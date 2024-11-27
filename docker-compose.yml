@@ -1,0 +1,30 @@
+version: 'latest'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - PRISMA_CLIENT_ENGINE_TYPE=dataproxy
+    networks:
+      - pharma-network
+    command: sh -c "npx prisma generate && npm start"
+    
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - pharma-network
+
+networks:
+  pharma-network:
+    driver: bridge
