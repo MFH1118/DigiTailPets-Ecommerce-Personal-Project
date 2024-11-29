@@ -1,5 +1,3 @@
-version: 'latest'
-
 services:
   backend:
     build: ./backend
