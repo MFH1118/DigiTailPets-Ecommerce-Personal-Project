@@ -5,23 +5,33 @@ services:
       - "5000:5000"
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=${DATABASE_URL}
-      - PRISMA_CLIENT_ENGINE_TYPE=dataproxy
+      # Add legacy watch mode for nodemon
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
     networks:
       - pharma-network
-    command: sh -c "npx prisma generate && npm start"
+    # Add legacy watch flag to nodemon
+    command: npm run dev -- --legacy-watch
     
   frontend:
     build: ./frontend
     ports:
       - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      # Add polling for Next.js
+      - WATCHPACK_POLLING=true
     volumes:
       - ./frontend:/usr/src/app
       - /usr/src/app/node_modules
-    depends_on:
-      - backend
+      - /usr/src/app/.next
     networks:
       - pharma-network
+    depends_on:
+      - backend
 
 networks:
   pharma-network:
