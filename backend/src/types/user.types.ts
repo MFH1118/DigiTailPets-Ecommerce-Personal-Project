@@ -20,7 +20,7 @@ export interface Authentication {
     authId: string;
     userId: string;
     authPasswordHash: string;
-    authPassowordReset: boolean;
+    authPasswordReset: boolean;
     authLoginAttempts: number;
     authLockoutEndTime: Date | null;
 }
