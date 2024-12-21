@@ -1,3 +1,5 @@
+// src/model/user.model.ts
+
 import { PrismaClient } from '@prisma/client';
 import { User, Authentication, UserRegistrationRequest } from '../types/user.types.js';
 
@@ -9,7 +11,13 @@ export class UserModel {
     try {
       // Use transaction to ensure both user and authentication are created
       const result = await prisma.$transaction(async (tx) => {
-        // Create user first
+        // Create CUSTOMER role first
+        const customerRole = await tx.role.findUniqueOrThrow({
+          where: {
+            name: 'CUSTOMER'
+          }
+        });
+        // Create user
         const user = await tx.user.create({
           data: {
             username: userData.userName,
@@ -17,7 +25,7 @@ export class UserModel {
             firstName: userData.firstName,
             lastName: userData.lastName,
             dateOfBirth: new Date(userData.dob),
-            roleId: '1', // Default role ID for customer - you might want to make this configurable
+            roleId: customerRole.id, // Default role ID for customer - you might want to make this configurable
             authentication: {
               create: {
                 passwordHash: hashedPassword,
@@ -28,7 +36,8 @@ export class UserModel {
             }
           },
           include: {
-            authentication: true
+            authentication: true,
+            role: true
           }
         });
 
