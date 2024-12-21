@@ -1,3 +1,5 @@
+// src/controllers/auth.controller.ts
+
 import { Request, Response } from 'express';
 import { UserModel } from '../model/user.model.js';
 import  { UserRegistrationRequest, ErrorResponse } from '../types/user.types.js';
