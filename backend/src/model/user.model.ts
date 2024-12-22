@@ -1,151 +1,222 @@
 // src/model/user.model.ts
 
-import { PrismaClient } from '@prisma/client';
-import { User, Authentication, UserRegistrationRequest } from '../types/user.types.js';
+import prisma from '../db/prisma.js';
+import { User, Authentication, UserRegistrationRequest, CacheKeys, CachedUser, CachedAuth, CachedRoleId } from '../types/user.types.js';
+import NodeCache from 'node-cache';
 
-const prisma = new PrismaClient();
+export const userCache = new NodeCache({ stdTTL: 600});
+
+
 
 export class UserModel {
-  // Create new user with authentication
-  static async createUser(userData: UserRegistrationRequest, hashedPassword: string): Promise<User> {
-    try {
-      // Use transaction to ensure both user and authentication are created
-      const result = await prisma.$transaction(async (tx) => {
-        // Create CUSTOMER role first
-        const customerRole = await tx.role.findUniqueOrThrow({
-          where: {
-            name: 'CUSTOMER'
-          }
-        });
-        // Create user
-        const user = await tx.user.create({
-          data: {
-            username: userData.userName,
-            email: userData.email,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            dateOfBirth: new Date(userData.dob),
-            roleId: customerRole.id, // Default role ID for customer - you might want to make this configurable
-            authentication: {
-              create: {
-                passwordHash: hashedPassword,
-                passwordReset: null,
-                loginAttempts: 0,
-                lockoutEndTime: null
-              }
-            }
-          },
-          include: {
-            authentication: true,
-            role: true
-          }
-        });
 
-        // Transform to match our User interface
-        return {
-          userId: user.id,
-          userName: user.username,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          dob: user.dateOfBirth,
-          dateCreated: user.dateCreated,
-          lastLogin: user.lastLogin,
-          isActive: user.isActive
-        };
-      });
-
-      return result;
-
-    } catch (error) {
-      throw new Error(`Error creating user: ${(error as Error).message}`);
+  // Helper method to get cached customer role ID
+  private static async getCustomerRoleId(): Promise<string> {
+    const cachedRoleId = userCache.get<CachedRoleId>(CacheKeys.CUSTOMER_ROLE);
+    
+    if (cachedRoleId) {
+        return cachedRoleId;
     }
+
+    const role = await prisma.role.findUniqueOrThrow({
+        where: { name: 'CUSTOMER' },
+        select: { id: true }
+    });
+
+    userCache.set(CacheKeys.CUSTOMER_ROLE, role.id);
+    return role.id;
   }
+
+  static async createUser(userData: UserRegistrationRequest, hashedPassword: string): Promise<User> {
+      try {
+          // Get customer role ID from cache
+          const customerRoleId = await this.getCustomerRoleId();
+
+          const result = await prisma.$transaction(async (tx) => {
+              const user = await tx.user.create({
+                  data: {
+                      username: userData.userName,
+                      email: userData.email,
+                      firstName: userData.firstName,
+                      lastName: userData.lastName,
+                      dateOfBirth: new Date(userData.dob),
+                      roleId: customerRoleId,
+                      authentication: {
+                          create: {
+                              passwordHash: hashedPassword,
+                              loginAttempts: 0
+                          }
+                      }
+                  },
+                  select: {
+                      id: true,
+                      username: true,
+                      email: true,
+                      firstName: true,
+                      lastName: true,
+                      dateOfBirth: true,
+                      dateCreated: true,
+                      lastLogin: true,
+                      isActive: true
+                  }
+              });
+
+              return {
+                  userId: user.id,
+                  userName: user.username,
+                  email: user.email,
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  dob: user.dateOfBirth,
+                  dateCreated: user.dateCreated,
+                  lastLogin: user.lastLogin,
+                  isActive: user.isActive
+              };
+          });
+
+          return result;
+
+      } catch (error) {
+          throw new Error(`Error creating user: ${(error as Error).message}`);
+      }
+   }
 
   //Find user by email
   static async findByEmail(email: string): Promise<User | null> {
     try {
-      const user = await prisma.user.findUnique({
-        where: { email },
-        include: {
-          authentication: true
+        const cacheKey = `${CacheKeys.USER_EMAIL}${email}`;
+        const cachedUser = userCache.get<CachedUser>(cacheKey);
+        
+        if (cachedUser) {
+            return cachedUser;
         }
-      })
 
-      if (!user) {
-        return null;
-      }
+        const user = await prisma.user.findUnique({
+            where: { email },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                dateOfBirth: true,
+                dateCreated: true,
+                lastLogin: true,
+                isActive: true
+            }
+        });
 
-      return {
-        userId: user.id,
-        userName: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        dob: user.dateOfBirth,
-        dateCreated: user.dateCreated,
-        lastLogin: user.lastLogin,
-        isActive: user.isActive
-      };
-      
-    } catch (error: any) {
-      throw new Error(`Error finding user: ${(error as Error).message}`);
-      
+        if (!user) {
+            return null;
+        }
+
+        const userResult = {
+            userId: user.id,
+            userName: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            dob: user.dateOfBirth,
+            dateCreated: user.dateCreated,
+            lastLogin: user.lastLogin,
+            isActive: user.isActive
+        };
+
+        userCache.set(cacheKey, userResult);
+        return userResult;
+        
+    } catch (error) {
+        throw new Error(`Error finding user: ${(error as Error).message}`);
     }
   }
   // find user by username
   static async findByUsername(username: string): Promise<User | null> {
     try {
-      const user = await prisma.user.findUnique({
-        where: { username },
-        include: {
-          authentication: true
+        const cacheKey = `${CacheKeys.USER_USERNAME}${username}`;
+        const cachedUser = userCache.get<CachedUser>(cacheKey);
+        
+        if (cachedUser) {
+            return cachedUser;
         }
-      });
 
-      if (!user) {
-        return null;
-      }
+        const user = await prisma.user.findUnique({
+            where: { username },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                dateOfBirth: true,
+                dateCreated: true,
+                lastLogin: true,
+                isActive: true
+            }
+        });
 
-      return {
-        userId: user.id,
-        userName: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        dob: user.dateOfBirth,
-        dateCreated: user.dateCreated,
-        lastLogin: user.lastLogin,
-        isActive: user.isActive
-      }
-    } catch (error:any) {
-      throw new Error(`Error finding user: ${(error as Error).message}`);
+        if (!user) {
+            return null;
+        }
+
+        const userResult = {
+            userId: user.id,
+            userName: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            dob: user.dateOfBirth,
+            dateCreated: user.dateCreated,
+            lastLogin: user.lastLogin,
+            isActive: user.isActive
+        };
+
+        userCache.set(cacheKey, userResult);
+        return userResult;
+
+    } catch (error) {
+        throw new Error(`Error finding user: ${(error as Error).message}`);
     }
   }
 
   // Get authentication details by userId
   static async getAuthentication(userId: string): Promise<Authentication | null> {
     try {
-      const auth = await prisma.authentication.findUnique({
-        where: { userId }
-      });
+        const cacheKey = `${CacheKeys.USER_AUTH}${userId}`;
+        const cachedAuth = userCache.get<CachedAuth>(cacheKey);
+        
+        if (cachedAuth) {
+            return cachedAuth;
+        }
 
-      if (!auth) {
-        return null;
-      }
+        const auth = await prisma.authentication.findUnique({
+            where: { userId }
+        });
 
-      return {
-        authId: auth.id,
-        userId: auth.userId,
-        authPasswordHash: auth.passwordHash,
-        authPasswordReset: !!auth.passwordReset,
-        authLoginAttempts: auth.loginAttempts,
-        authLockoutEndTime: auth.lockoutEndTime
+        if (!auth) {
+            return null;
+        }
 
-      }
-      
-    } catch (error: any) {
-      throw new Error(`Error getting authentication: ${(error as Error).message}`);
+        const authResult = {
+            authId: auth.id,
+            userId: auth.userId,
+            authPasswordHash: auth.passwordHash,
+            authPasswordReset: !!auth.passwordReset,
+            authLoginAttempts: auth.loginAttempts,
+            authLockoutEndTime: auth.lockoutEndTime
+        };
+
+        userCache.set(cacheKey, authResult);
+        return authResult;
+        
+    } catch (error) {
+        throw new Error(`Error getting authentication: ${(error as Error).message}`);
     }
+  }
+
+    // Method to invalidate user cache
+    static invalidateUserCache(email: string, userName: string, userId: string): void {
+    userCache.del(`${CacheKeys.USER_EMAIL}${email}`);
+    userCache.del(`${CacheKeys.USER_USERNAME}${userName}`);
+    userCache.del(`${CacheKeys.USER_AUTH}${userId}`);
   }
 }
