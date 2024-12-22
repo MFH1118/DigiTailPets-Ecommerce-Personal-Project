@@ -4,12 +4,12 @@ import express, { Express, Request, Response, Application} from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes.js'
-import { PrismaClient } from '@prisma/client';
+import prisma from './db/prisma.js';
+import { userCache } from './model/user.model.js';
 
 dotenv.config();
 
 const app: Express = express();
-const prisma: PrismaClient = new PrismaClient();
 
 const PORT: number = parseInt(process.env.BACKEND_PORT || '5000', 10);
 
@@ -23,13 +23,18 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Hello Worlds!');
 });
 
-
-
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({
     status: 'ok'
   });
 });
+
+const cleanup = async () => {
+  console.log('Cleaning up...');
+  userCache.close();
+  await prisma.$disconnect();
+  console.log('Cleaned up successfully');
+}
 
 const run = async (): Promise<void> => {
   try {
@@ -48,8 +53,30 @@ const run = async (): Promise<void> => {
   }
 };
 
+process.on('SIGTERM', async () => {
+  console.log('Received SIGTERM');
+  await cleanup();
+  process.exit(0);
+})
+
+process.on('SIGINT', async () => {
+  console.log('Received SIGINT');
+  await cleanup();
+  process.exit(0);
+})
+
 process.on('unhandledRejection', async (error: any) => {
   console.error('Unhandled rejection:', error);
 });
 
-run().catch(console.error);
+process.on('uncaughtException', async (error: any) => {
+  console.error('Uncaught exception:', error);
+  await cleanup();
+  process.exit(1);
+});
+
+run().catch(async (error) => {
+  console.error('Error during startup:', error);
+  await cleanup();
+  process.exit(1);
+});
