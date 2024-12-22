@@ -76,7 +76,7 @@ export class UserModel {
 
           return result;
 
-      } catch (error) {
+      } catch (error: any) {
           throw new Error(`Error creating user: ${(error as Error).message}`);
       }
    }
@@ -125,7 +125,7 @@ export class UserModel {
         userCache.set(cacheKey, userResult);
         return userResult;
         
-    } catch (error) {
+    } catch (error: any) {
         throw new Error(`Error finding user: ${(error as Error).message}`);
     }
   }
@@ -173,7 +173,7 @@ export class UserModel {
         userCache.set(cacheKey, userResult);
         return userResult;
 
-    } catch (error) {
+    } catch (error: any) {
         throw new Error(`Error finding user: ${(error as Error).message}`);
     }
   }
@@ -208,7 +208,7 @@ export class UserModel {
         userCache.set(cacheKey, authResult);
         return authResult;
         
-    } catch (error) {
+    } catch (error: any) {
         throw new Error(`Error getting authentication: ${(error as Error).message}`);
     }
   }
