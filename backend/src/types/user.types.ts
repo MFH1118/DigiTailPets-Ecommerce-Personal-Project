@@ -1,6 +1,13 @@
-/*
-    Type definitions for user related data
-*/
+// src/types/user.types.ts
+
+// Cache related types
+export interface CacheOptions {
+    stdTTL: number;  // Standard Time To Live in seconds
+}
+
+export interface CacheContent {
+    [key: string]: User | Authentication | string | null;
+}
 
 // User Registration data
 export interface User {
@@ -32,6 +39,14 @@ export interface Role {
     roleDescription: string;
 }
 
+// Cache key types for type safety
+export enum CacheKeys {
+    CUSTOMER_ROLE = 'customer_role_id',
+    USER_EMAIL = 'user:email:',
+    USER_USERNAME = 'user:username:',
+    USER_AUTH = 'auth:'
+}
+
 // User Registration Client Request
 export interface UserRegistrationRequest {
     userName: string;
@@ -52,4 +67,38 @@ export interface UserRegistrationResponse {
 export interface ErrorResponse {
     error: string;
     details?: string;
+}
+
+// Database Select Types for Prisma
+export interface UserSelect {
+    id: true;
+    username: true;
+    email: true;
+    firstName: true;
+    lastName: true;
+    dateOfBirth: true;
+    dateCreated: true;
+    lastLogin: true;
+    isActive: true;
+}
+
+export interface AuthenticationSelect {
+    id: true;
+    userId: true;
+    passwordHash: true;
+    passwordReset: true;
+    loginAttempts: true;
+    lockoutEndTime: true;
+}
+
+// Cache Result Types
+export type CachedUser = User | null;
+export type CachedAuth = Authentication | null;
+export type CachedRoleId = string | null;
+
+// Type for cache invalidation keys
+export interface CacheInvalidationKeys {
+    email: string;
+    userName: string;
+    userId: string;
 }
