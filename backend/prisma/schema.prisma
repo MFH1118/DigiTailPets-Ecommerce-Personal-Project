@@ -25,6 +25,7 @@ model User {
   role            Role           @relation(fields: [roleId], references: [id])
   roleId          String         @map("role_id")
   authentication  Authentication?
+  sessions        Session[]      // Changed from Session to sessions for consistency
 
   @@map("users")
 }
@@ -50,4 +51,20 @@ model Authentication {
   userId          String    @unique @map("user_id")
 
   @@map("authentications")
+}
+
+model Session {
+  id                String    @id @default(uuid()) @map("session_id")
+  userId            String    @map("user_id")
+  token             String    @unique @map("session_token")
+  expiry            DateTime  @map("session_expiry")
+  type              String    @map("session_type")
+  refreshToken      String?   @unique @map("session_refresh_token")
+  creationTime      DateTime  @default(now()) @map("session_creation_time")
+  lastAccessed      DateTime  @default(now()) @map("session_last_accessed")
+
+  // Relations
+  user              User      @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
 }
