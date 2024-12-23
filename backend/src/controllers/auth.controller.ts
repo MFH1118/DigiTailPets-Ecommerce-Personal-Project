@@ -21,6 +21,16 @@ export class AuthController {
                 return res.status(400).json(errorResponse);
             }
 
+            // check if username exists
+            const existingUserName = await UserModel.findByUserName(registrationData.userName);
+            if (existingUserName) {
+                const errorResponse: ErrorResponse = {
+                    error: 'Username already exists'
+                };
+
+                return res.status(400).json(errorResponse);
+            }
+
             // Hash password
             const hashedPassword = await hashPassword(password);
 

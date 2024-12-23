@@ -130,7 +130,7 @@ export class UserModel {
     }
   }
   // find user by username
-  static async findByUsername(username: string): Promise<User | null> {
+  static async findByUserName(username: string): Promise<User | null> {
     try {
         const cacheKey = `${CacheKeys.USER_USERNAME}${username}`;
         const cachedUser = userCache.get<CachedUser>(cacheKey);
