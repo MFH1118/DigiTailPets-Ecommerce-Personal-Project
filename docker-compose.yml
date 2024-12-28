@@ -13,7 +13,7 @@ services:
       - /usr/src/app/node_modules
       - /usr/src/app/dist
     networks:
-      - pharma-network
+      - digiTailPets-network
     # Add legacy watch flag to nodemon
     command: npm run dev -- --legacy-watch
     
@@ -30,10 +30,8 @@ services:
       - /usr/src/app/node_modules
       - /usr/src/app/.next
     networks:
-      - pharma-network
-    depends_on:
-      - backend
+      - digiTailPets-network
 
 networks:
-  pharma-network:
+  digiTailPets-network:
     driver: bridge
