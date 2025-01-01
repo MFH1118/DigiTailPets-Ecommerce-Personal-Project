@@ -7,6 +7,10 @@ const router: Router = express.Router();
 
 // Registration endpoint
 router.post('/register', validateRegistrationInput, AuthController.registerUser);
+// Login endpoint
+router.post('/login', AuthController.loginUser);
+// Logout endpoint
+router.post('/logout', AuthController.logoutUser);
 
 
 export default router;

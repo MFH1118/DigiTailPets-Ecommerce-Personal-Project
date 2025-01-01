@@ -232,13 +232,13 @@ export class UserModel {
         }
     }
 
-    static async updateUserActivity(userId: string): Promise<void> {
+    static async updateUserActivity(userId: string, activeStatus: boolean): Promise<void> {
         try {
             await prisma.user.update({
                 where: { id: userId },
                 data: { 
                     lastLogin: new Date(),
-                    isActive: true 
+                    isActive: activeStatus 
                 }
             });
 
