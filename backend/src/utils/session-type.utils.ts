@@ -1,3 +1,5 @@
+// src/utils/session-type.utils.ts
+
 import { Request } from 'express';
 
 export type SessionType = 'web' | 'mobile' | 'api';
