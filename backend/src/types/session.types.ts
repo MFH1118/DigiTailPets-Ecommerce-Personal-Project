@@ -6,7 +6,6 @@ export interface Session {
     session_token: string;
     session_expiry: Date;
     session_type: 'web' | 'mobile' | 'api';
-    session_refresh_token: string | null;
     session_creation_time: Date;
     session_last_accessed: Date;
 }
