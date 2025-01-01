@@ -59,7 +59,6 @@ model Session {
   token             String    @unique @map("session_token")
   expiry            DateTime  @map("session_expiry")
   type              String    @map("session_type")
-  refreshToken      String?   @unique @map("session_refresh_token")
   creationTime      DateTime  @default(now()) @map("session_creation_time")
   lastAccessed      DateTime  @default(now()) @map("session_last_accessed")
 
