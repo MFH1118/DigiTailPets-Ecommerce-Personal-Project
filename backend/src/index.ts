@@ -6,6 +6,8 @@ import cors from 'cors';
 import authRoutes from './routes/auth.routes.js'
 import prisma from './db/prisma.js';
 import { userCache } from './model/user.model.js';
+import { getSessionTypeInfo } from './utils/session-type.utils.js';
+import useragent from 'express-useragent';
 
 dotenv.config();
 
@@ -17,6 +19,7 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth/', authRoutes);
+app.use(useragent.express());
 
 // Routes
 app.get('/', (req: Request, res: Response) => {
@@ -27,6 +30,11 @@ app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({
     status: 'ok'
   });
+});
+
+app.get('/session-type', (req: Request, res: Response) => {
+  const sessionTypeInfo = getSessionTypeInfo(req);
+  res.status(200).json(sessionTypeInfo);
 });
 
 const cleanup = async () => {
