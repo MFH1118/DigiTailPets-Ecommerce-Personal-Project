@@ -8,7 +8,7 @@ import prisma from './db/prisma.js';
 import { userCache } from './model/user.model.js';
 import { getSessionTypeInfo } from './utils/session-type.utils.js';
 import useragent from 'express-useragent';
-
+import cookieParser from 'cookie-parser';
 dotenv.config();
 
 const app: Express = express();
@@ -16,6 +16,7 @@ const app: Express = express();
 const PORT: number = parseInt(process.env.BACKEND_PORT || '5000', 10);
 
 app.use(express.json());
+app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth/', authRoutes);

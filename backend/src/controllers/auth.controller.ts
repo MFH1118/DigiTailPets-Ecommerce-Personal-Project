@@ -4,6 +4,8 @@ import { Request, Response } from 'express';
 import { UserModel } from '../model/user.model.js';
 import  { UserRegistrationRequest, ErrorResponse } from '../types/user.types.js';
 import { hashPassword } from '../utils/auth.utils.js';
+import { SessionModel } from '../model/session.model.js';
+import { User } from '../types/user.types.js';
 
 export class AuthController {
     static async registerUser(req: Request, res: Response): Promise<Response> {
@@ -60,5 +62,65 @@ export class AuthController {
             return res.status(500).json(errorResponse)
         }
 
-    }   
+    }
+
+    static async loginUser(req: Request, res: Response): Promise<Response> {
+        try {
+            // get user from request
+            const {email, password} = req.body;
+
+            // verify user email
+            const user = await UserModel.findByEmail(email);
+            if (!user) {
+                const errorResponse: ErrorResponse = {
+                    error: 'Invalid email or password'
+                };
+                return res.status(401).json(errorResponse);
+            }
+
+            // verify user password
+            const isValidPassword = await UserModel.verifyPassword(user.userId, password);
+            if (!isValidPassword) {
+                const errorResponse: ErrorResponse = {
+                    error: 'Invalid email or password'
+                };
+                return res.status(401).json(errorResponse);
+            }
+
+            // create session
+            const session = await SessionModel.createSession(user.userId, req);
+
+            res.cookie('sessionToken', session.session_token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                path: '/',
+                domain: process.env.COOKIE_DOMAIN || undefined
+            });
+
+            // update isActive status
+            await UserModel.updateUserActivity(user.userId);
+
+            return res.status(200).json({
+                message: 'Login successful',
+                user: {
+                    userId: user.userId,
+                    userName: user.userName,
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    isActive: user.isActive,
+                    lastLogin: user.lastLogin
+                }
+            });
+            
+        } catch (error) {
+            console.error('Login error:', error);
+            const errorResponse: ErrorResponse = {
+                error: 'Internal server error during login',
+                details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+            };
+            return res.status(500).json(errorResponse);
+        }
+    }
 }
