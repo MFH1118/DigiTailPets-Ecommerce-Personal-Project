@@ -128,4 +128,24 @@ export class SessionModel {
             
         }
     }
+
+    static async expireSession(token: string): Promise<void> {
+        try {
+            await prisma.session.updateMany({
+                where: {
+                    token: token,
+                    expiry: {
+                        gte: new Date()
+                    }
+                },
+                data: {
+                    expiry: new Date()
+                }
+            });
+            
+        } catch (error: any) {
+            throw new Error(`Failed to expire session: ${(error as Error).message}`);
+            
+        }
+    }
 }

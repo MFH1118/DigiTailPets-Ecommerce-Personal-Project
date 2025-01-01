@@ -99,7 +99,7 @@ export class AuthController {
             });
 
             // update isActive status
-            await UserModel.updateUserActivity(user.userId);
+            await UserModel.updateUserActivity(user.userId, true);
 
             return res.status(200).json({
                 message: 'Login successful',
@@ -109,8 +109,7 @@ export class AuthController {
                     email: user.email,
                     firstName: user.firstName,
                     lastName: user.lastName,
-                    isActive: user.isActive,
-                    lastLogin: user.lastLogin
+                    isActive: user.isActive
                 }
             });
             
@@ -121,6 +120,49 @@ export class AuthController {
                 details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
             };
             return res.status(500).json(errorResponse);
+        }
+    }
+
+    static async logoutUser(req: Request, res: Response): Promise<Response> {
+        try {
+            // Get session token from cookie
+            const sessionToken = req.cookies.sessionToken;
+            if (!sessionToken) {
+                return res.status(400).json({
+                    error: 'No active session'
+                });
+            }
+
+            // Get session from database
+            const userSession = await SessionModel.validateSession(sessionToken);
+
+            // Expire the session in database
+            await SessionModel.expireSession(sessionToken);
+
+            // Update user activity status
+            await UserModel.updateUserActivity(userSession?.user_id as string, false);
+
+            // Clear the session cookie
+            res.clearCookie('sessionToken', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                path: '/',
+                domain: process.env.COOKIE_DOMAIN || undefined
+            });
+
+            return res.status(200).json({
+                message: 'Logout successful'
+            });
+            
+        } catch (error: any) {
+            console.error('Logout error:', error);
+            const errorResponse: ErrorResponse = {
+                error: 'Internal server error during logout',
+                details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+            };
+            return res.status(500).json(errorResponse);
+            
         }
     }
 }
