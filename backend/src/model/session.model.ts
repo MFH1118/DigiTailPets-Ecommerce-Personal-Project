@@ -12,37 +12,54 @@ export class SessionModel {
         return randomBytes(32).toString('hex');
     }
 
-    // Generate secure refresh token
-    private static generateRefreshToken(): string {
-        return randomBytes(32).toString('hex');
-    }
-
     static async createSession(userId: string, req: Request): Promise<Session> {
         const sessionType = SessionTypeDetector.detectSessionType(req);
         const sessionToken = this.generateSessionToken();
-        const refreshToken = this.generateRefreshToken();
-        const expiryTIme = new Date(Date.now() + 3600000); // 1 hour from now
+        const expiryTime = new Date(Date.now() + 3600000); // 1 hour from now
         
         try {
+
+            // check for existing active sessions
+            const existingSessions = await prisma.session.findMany({
+                where: {
+                    userId: userId,
+                    expiry: {
+                        gte: new Date()
+                    }
+                }
+            });
+
+            if (existingSessions.length > 0) {
+                await prisma.session.updateMany({
+                    where: {
+                        userId: userId,
+                        expiry: {
+                            gt: new Date()
+                        }
+                    },
+                    data: {
+                        expiry: new Date() // Expire them now
+                    }
+                });
+            }
+
             const session = await prisma.session.create({
                 data: {
                     userId: userId,
                     token: sessionToken,
-                    expiry: expiryTIme,
+                    expiry: expiryTime,
                     type: sessionType,
-                    refreshToken: refreshToken,
                     creationTime: new Date(),
                     lastAccessed: new Date()
                 } 
             });
-            // TODO: user express-useragent or ua-parser-js to get user agent details for session_type later
+
             return {
                 session_id: session.id,
                 user_id: session.userId,
                 session_token: session.token,
                 session_expiry: session.expiry,
                 session_type: sessionType,
-                session_refresh_token: session.refreshToken,
                 session_creation_time: session.creationTime,
                 session_last_accessed: session.lastAccessed
             }
@@ -55,7 +72,9 @@ export class SessionModel {
         try {
             const updateSession = await prisma.session.update({
                 where: { id: sessionId },
-                data: { type: newType }
+                data: { 
+                    type: newType,
+                    lastAccessed: new Date()}
             });
 
             return {
@@ -64,13 +83,48 @@ export class SessionModel {
                 session_token: updateSession.token,
                 session_expiry: updateSession.expiry,
                 session_type: newType,
-                session_refresh_token: updateSession.refreshToken,
                 session_creation_time: updateSession.creationTime,
                 session_last_accessed: updateSession.lastAccessed
             }
             
         } catch (error: any) {
             throw new Error(`Failed to update session: ${(error as Error).message}`);
+            
+        }
+    }
+
+    static async validateSession(token: string): Promise<Session | null> {
+        try {
+            const session = await prisma.session.findFirst({
+                where: {
+                    token,
+                    expiry: {
+                        gt: new Date()
+                    }
+                }
+            });
+
+            if (!session) {
+                return null;
+            }
+
+            const updateSession = await prisma.session.update({
+                where: { id: session.id },
+                data: { lastAccessed: new Date() }
+            });
+
+            return {
+                session_id: updateSession.id,
+                user_id: updateSession.userId,
+                session_token: updateSession.token,
+                session_expiry: updateSession.expiry,
+                session_type: updateSession.type as SessionType,
+                session_creation_time: updateSession.creationTime,
+                session_last_accessed: updateSession.lastAccessed
+            }
+            
+        } catch (error: any) {
+            throw new Error(`Failed to validate session: ${(error as Error).message}`);
             
         }
     }
