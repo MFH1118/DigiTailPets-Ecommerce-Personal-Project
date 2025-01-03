@@ -2,7 +2,8 @@
 import prisma from '../db/prisma.js';
 import { randomBytes } from 'crypto';
 import { Session } from '../types/session.types.js';
-import { SessionType, SessionTypeDetector } from '../utils/session-type.utils.js';
+import { SessionTypeDetector } from '../utils/session-type.utils.js';
+import { SessionType } from '../types/session.types.js';
 import { Request } from 'express';
 
 export class SessionModel {
