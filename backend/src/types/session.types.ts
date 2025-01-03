@@ -31,3 +31,8 @@ export interface SessionTypeInfo {
         source?: string;
     };
 }
+
+export interface ErrorResponse {
+    error: string;
+    details?: string;
+}
