@@ -43,3 +43,8 @@ export interface AddressSelect {
     addressType: true;
     isDefault: true;
 }
+
+export interface ErrorResponse {
+    error: string;
+    details?: string;
+}
