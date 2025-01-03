@@ -78,14 +78,30 @@ export class AuthController {
                 return res.status(401).json(errorResponse);
             }
 
+            // check user account if locked
+            const isLocked = await UserModel.isAccountLocked(user.userId);
+            if (isLocked) {
+                const errorResponse: ErrorResponse = {
+                    error: 'Account is temporarily locked due to too many failed attempts. Please try again later.',
+                    details: 'Please wait 15 minutes before trying again'
+                };
+                return res.status(401).json(errorResponse);
+            }
+
             // verify user password
             const isValidPassword = await UserModel.verifyPassword(user.userId, password);
             if (!isValidPassword) {
+                // increment login attempts
+                await UserModel.handleFailedLogin(user.userId);
+                
                 const errorResponse: ErrorResponse = {
                     error: 'Invalid email or password'
                 };
                 return res.status(401).json(errorResponse);
             }
+
+            // reset login attempts for successful login
+            await UserModel.resetLoginAttempts(user.userId);
 
             // create session
             const session = await SessionModel.createSession(user.userId, req);

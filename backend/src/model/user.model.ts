@@ -28,6 +28,27 @@ export class UserModel {
         return role.id;
     }
 
+    private static async invalidateUserCache(userId: string): Promise<void> {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                email: true,
+                username: true
+            }
+        })
+
+        if (user) {
+            this.invalidateCache(user.email, user.username, userId);
+        }
+    }
+
+    // Method to invalidate user cache
+    static invalidateCache(email: string, userName: string, userId: string): void {
+        userCache.del(`${CacheKeys.USER_EMAIL}${email}`);
+        userCache.del(`${CacheKeys.USER_USERNAME}${userName}`);
+        userCache.del(`${CacheKeys.USER_AUTH}${userId}`);
+    }
+
     static async createUser(userData: UserRegistrationRequest, hashedPassword: string): Promise<User> {
       try {
           // Get customer role ID from cache
@@ -232,6 +253,7 @@ export class UserModel {
         }
     }
 
+    // Update user activity login in and out
     static async updateUserActivity(userId: string, activeStatus: boolean): Promise<void> {
         try {
             await prisma.user.update({
@@ -242,16 +264,86 @@ export class UserModel {
                 }
             });
 
+            this.invalidateUserCache(userId);
+
         } catch (error: any) {
             throw new Error(`Error updating user activity: ${(error as Error).message}`);
             
         }
     }
 
-    // Method to invalidate user cache
-    static invalidateUserCache(email: string, userName: string, userId: string): void {
-        userCache.del(`${CacheKeys.USER_EMAIL}${email}`);
-        userCache.del(`${CacheKeys.USER_USERNAME}${userName}`);
-        userCache.del(`${CacheKeys.USER_AUTH}${userId}`);
+    static async handleFailedLogin(userId: string): Promise<void> {
+        try {
+            const MAX_LOGIN_ATTEMPTS = 5;
+            const LOCKOUT_DURATION = 1 * 60 * 1000; // 15 minutes. 1 minute for testing
+
+            const auth = await prisma.authentication.update({
+                where: { userId },
+                data: {
+                    loginAttempts: {
+                        increment: 1
+                    }
+                }
+            });
+
+            // check max attempts reached and lockout user
+            if (auth.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+                await prisma.authentication.update({
+                    where: { userId },
+                    data: {
+                        lockoutEndTime: new Date(Date.now() + LOCKOUT_DURATION)
+                    }
+                });
+            }
+
+            this.invalidateUserCache(userId);
+            
+        } catch (error: any) {
+            throw new Error(`Error handling failed login: ${(error as Error).message}`);
+            
+        }
+    }
+
+    static async resetLoginAttempts(userId: string): Promise<void> {
+        try {
+            await prisma.authentication.update({
+                where: { userId },
+                data: {
+                    loginAttempts: 0,
+                    lockoutEndTime: null
+                }
+            });
+
+            this.invalidateUserCache(userId);
+            
+        } catch (error: any) {
+            throw new Error(`Error resetting login attempts: ${(error as Error).message}`);
+            
+        }
+    }
+
+    static async isAccountLocked(userId: string): Promise<boolean> {
+        try {
+            const auth = await this.getAuthentication(userId);
+            if (!auth) {
+                return false;
+            }
+
+            const lockOutEndTime = auth.authLockoutEndTime;
+            if (!lockOutEndTime) {
+                return false;
+            }
+
+            if (new Date() > new Date(lockOutEndTime)) {
+                await this.resetLoginAttempts(userId);
+                return false;
+            }
+
+            return true;
+            
+        } catch (error: any) {
+            throw new Error(`Error checking account lock: ${(error as Error).message}`);
+            
+        }
     }
 }
