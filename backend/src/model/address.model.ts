@@ -21,7 +21,7 @@ export class AddressModel {
     }
 
     // create a new address
-    static async creatAddress(userId: string, addressData: AddressRequest): Promise<Address> {
+    static async createAddress(userId: string, addressData: AddressRequest): Promise<Address> {
         try {
 
             if (addressData.isDefault) {
@@ -166,9 +166,26 @@ export class AddressModel {
             await prisma.address.delete({
                 where: { id: addressId }
             });
-            
+
         } catch (error: any) {
             throw new Error(`Error deleting address: ${error.message as Error}`);
+        }
+    }
+
+    static async setDefaultAddress(userId: string, addressId: string): Promise<void> {
+        try {
+            await this.unsetDefaultAddress(userId);
+
+            await prisma.address.update({
+                where: { id: addressId },
+                data: {
+                    isDefault: true
+                }
+            });
+            
+        } catch (error: any) {
+            throw new Error(`Error setting default address: ${error.message as Error}`);
+            
         }
     }
 
