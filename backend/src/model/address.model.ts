@@ -1,8 +1,10 @@
+// src/model/address.model.ts
 import prisma from '../db/prisma.js';
 import { Address, AddressRequest } from '../types/address.types.js';
 
 export class AddressModel {
 
+    // private function to unset default address
     private static async unsetDefaultAddress(userId: string): Promise<void> {
         try {
             await prisma.address.updateMany({
@@ -31,7 +33,7 @@ export class AddressModel {
             const address = await prisma.address.create({
                 data: {
                     userId,
-                    street: addressData.street1,
+                    street1: addressData.street1,
                     street2 : addressData.street2,
                     city : addressData.city,
                     state : addressData.state,
@@ -43,7 +45,7 @@ export class AddressModel {
                 select: {
                     id: true,
                     userId: true,
-                    street: true,
+                    street1: true,
                     street2: true,
                     city: true,
                     state: true,
@@ -57,7 +59,7 @@ export class AddressModel {
             return {
                 addressId: address.id,
                 userId: address.userId,
-                street1: address.street,
+                street1: address.street1,
                 street2: address.street2 || undefined,
                 city: address.city,
                 state: address.state,
@@ -73,14 +75,15 @@ export class AddressModel {
         }
     }
 
-    static async getAddressesByUserId(userId: string): Promise<Address[]> {
+    // get address by id
+    static async getAddressById(addressId: string): Promise<Address> {
         try {
-            const addresses = await prisma.address.findMany({
-                where: { userId },
+            const address = await prisma.address.findUnique({
+                where: { id: addressId },
                 select: {
                     id: true,
                     userId: true,
-                    street: true,
+                    street1: true,
                     street2: true,
                     city: true,
                     state: true,
@@ -91,10 +94,54 @@ export class AddressModel {
                 }
             });
 
+            if (!address) {
+                throw new Error('Address not found');
+            }
+
+            return {
+                addressId: address.id,
+                userId: address.userId,
+                street1: address.street1,
+                street2: address.street2 || undefined,
+                city: address.city,
+                state: address.state,
+                postalCode: address.postalCode,
+                country: address.country,
+                addressType: address.addressType as 'SHIPPING' | 'BILLING',
+                isDefault: address.isDefault
+            }
+
+        } catch (error: any) {
+            throw new Error(`Error fetching address: ${error.message as Error}`);
+        }
+    }
+    // get all addresses of users.
+    static async getAddressesByUserId(userId: string): Promise<Address[]> {
+        try {
+            const addresses = await prisma.address.findMany({
+                where: { userId },
+                select: {
+                    id: true,
+                    userId: true,
+                    street1: true,
+                    street2: true,
+                    city: true,
+                    state: true,
+                    postalCode: true,
+                    country: true,
+                    addressType: true,
+                    isDefault: true
+                }
+            });
+
+            if (!addresses) {
+                return [];
+            }
+
             return addresses.map(address => ({
                 addressId: address.id,
                 userId: address.userId,
-                street1: address.street,
+                street1: address.street1,
                 street2: address.street2 || undefined,
                 city: address.city,
                 state: address.state,
@@ -131,7 +178,7 @@ export class AddressModel {
                 select: {
                     id: true,
                     userId: true,
-                    street: true,
+                    street1: true,
                     street2: true,
                     city: true,
                     state: true,
@@ -145,7 +192,7 @@ export class AddressModel {
             return {
                 addressId: updatedAddress.id,
                 userId: updatedAddress.userId,
-                street1: updatedAddress.street,
+                street1: updatedAddress.street1,
                 street2: updatedAddress.street2 || undefined,
                 city: updatedAddress.city,
                 state: updatedAddress.state,
@@ -199,7 +246,7 @@ export class AddressModel {
                 select: {
                     id: true,
                     userId: true,
-                    street: true,
+                    street1: true,
                     street2: true,
                     city: true,
                     state: true,
@@ -217,7 +264,7 @@ export class AddressModel {
             return {
                 addressId: defaultAddress.id,
                 userId: defaultAddress.userId,
-                street1: defaultAddress.street,
+                street1: defaultAddress.street1,
                 street2: defaultAddress.street2 || undefined,
                 city: defaultAddress.city,
                 state: defaultAddress.state,
