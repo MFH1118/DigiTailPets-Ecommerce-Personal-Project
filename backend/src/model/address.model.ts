@@ -7,6 +7,18 @@ export class AddressModel {
     // private function to unset default address
     private static async unsetDefaultAddress(userId: string): Promise<void> {
         try {
+            // check first if there is a default address
+            const defaultAddress = await prisma.address.findFirst({
+                where: {
+                    userId,
+                    isDefault: true
+                }
+            });
+            
+            if (!defaultAddress) {
+                return;
+            }
+            
             await prisma.address.updateMany({
                 where: {
                     userId,
@@ -16,6 +28,7 @@ export class AddressModel {
                     isDefault: false
                 }
             });
+
         } catch (error: any) {
             throw new Error(`Error unsetting default address: ${error.message as Error}`);
             
@@ -66,7 +79,7 @@ export class AddressModel {
                 postalCode: address.postalCode,
                 country: address.country,
                 addressType: address.addressType as 'SHIPPING' | 'BILLING',
-                isDefault: address.isDefault
+                isDefault: false
             }
 
         } catch (error: any) {
