@@ -9,6 +9,8 @@ import { userCache } from './model/user.model.js';
 import { getSessionTypeInfo } from './utils/session-type.utils.js';
 import useragent from 'express-useragent';
 import cookieParser from 'cookie-parser';
+import addressRoutes from './routes/address.routes.js';
+
 dotenv.config();
 
 const app: Express = express();
@@ -20,6 +22,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth/', authRoutes);
+app.use('/api/addresses/', addressRoutes);
 app.use(useragent.express());
 
 // Routes
