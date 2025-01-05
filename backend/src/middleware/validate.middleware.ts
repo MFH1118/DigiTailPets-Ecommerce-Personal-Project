@@ -1,10 +1,13 @@
+// src/middleware/validate.middleware.ts
+
 import { Request, Response, NextFunction } from 'express';
 import { UserRegistrationRequest, ErrorResponse } from '../types/user.types.js';
+import { AddressRequest } from '../types/address.types.js';
 
-export const validateRegistrationInput = (req: Request, res: Response, next: NextFunction) => {
+export const validateRegistrationInput = async (req: Request, res: Response, next: NextFunction) => {
     const { userName, email, firstName, lastName, dob, password }: UserRegistrationRequest = req.body;
 
-        // Check input validation
+    // Check input validation
     if (!userName || !email || !firstName || !lastName || !dob || !password) {
         const errorResponse: ErrorResponse = {
             error: 'Missing required fields',
@@ -51,4 +54,51 @@ export const validateRegistrationInput = (req: Request, res: Response, next: Nex
     }
 
     next();
+};
+
+export const validateAddressInput = async (req: Request, res: Response, next: NextFunction) => {
+    const { street1, city, state, postalCode, country, addressType }: AddressRequest = req.body;
+
+    // check for missing fields
+    if (!street1 || !city || !state || !postalCode || !country || !addressType) {
+        const errorResponse: ErrorResponse = {
+            error: 'Missing required fields',
+            details: 'All fields are required for address creation'
+        };
+
+        return res.status(400).json(errorResponse);
+    }
+
+    // check if street, city, state, and country are valid strings
+    if (typeof street1 !== 'string' || typeof city !== 'string' || typeof state !== 'string' || typeof country !== 'string') {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid field types',
+            details: 'Street, city, state, and country must be strings'
+        };
+
+        return res.status(400).json(errorResponse);
+    }
+
+    // check if postal code is a valid string and is numerical
+    if (typeof postalCode !== 'string' || isNaN(Number(postalCode))) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid postal code',
+            details: 'Postal code must be a string of numbers'
+        };
+
+        return res.status(400).json(errorResponse);
+    }
+
+    // check if address type is valid
+    if (addressType !== 'SHIPPING' && addressType !== 'BILLING') {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid address type',
+            details: 'Address type must be either SHIPPING or BILLING'
+        };
+
+        return res.status(400).json(errorResponse); 
+    }
+
+    next();
+
 }
