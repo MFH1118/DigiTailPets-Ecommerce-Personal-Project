@@ -24,6 +24,7 @@ export class SessionModel {
             const existingSessions = await prisma.session.findMany({
                 where: {
                     userId: userId,
+                    type: sessionType,
                     expiry: {
                         gte: new Date()
                     }
@@ -34,6 +35,7 @@ export class SessionModel {
                 await prisma.session.updateMany({
                     where: {
                         userId: userId,
+                        type: sessionType,
                         expiry: {
                             gt: new Date()
                         }
@@ -146,6 +148,26 @@ export class SessionModel {
             
         } catch (error: any) {
             throw new Error(`Failed to expire session: ${(error as Error).message}`);
+            
+        }
+    }
+
+    static async expireAllUserSessions(userId: string): Promise<void> {
+        try {
+            await prisma.session.updateMany({
+                where: {
+                    userId: userId,
+                    expiry: {
+                        gte: new Date()
+                    }
+                },
+                data: {
+                    expiry: new Date()
+                }
+            });
+            
+        } catch (error: any) {
+            throw new Error(`Failed to expire all user sessions: ${(error as Error).message}`);
             
         }
     }

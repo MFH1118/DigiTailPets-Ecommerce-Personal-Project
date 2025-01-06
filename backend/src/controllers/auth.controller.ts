@@ -5,7 +5,7 @@ import { UserModel } from '../model/user.model.js';
 import  { UserRegistrationRequest, ErrorResponse } from '../types/user.types.js';
 import { hashPassword } from '../utils/auth.utils.js';
 import { SessionModel } from '../model/session.model.js';
-import { User } from '../types/user.types.js';
+import { SessionTypeDetector } from '../utils/session-type.utils.js';
 
 export class AuthController {
     static async registerUser(req: Request, res: Response): Promise<Response> {
@@ -68,6 +68,38 @@ export class AuthController {
         try {
             // get user from request
             const {email, password} = req.body;
+            const currentSessionType = SessionTypeDetector.detectSessionType(req);
+            console.log(currentSessionType)
+
+            // check existing session in cookie
+            const existingSessionToken = req.cookies.sessionToken;
+            if (existingSessionToken) {
+                const validSession = await SessionModel.validateSession(existingSessionToken);
+
+                // check if there is a valid session of the same type for the user
+                if (validSession && validSession.session_type === currentSessionType){
+                    // if validSession verify if its for the user
+                    const existingUser = await UserModel.findByEmail(email);
+                    if (existingUser && existingUser.userId === validSession?.user_id) {
+                        
+                        //update the session last acccess time and return the existing session
+                        await SessionModel.updateSession(validSession.session_id, SessionTypeDetector.detectSessionType(req));
+
+                        // return success response
+                        return res.status(200).json({
+                            message: "Already logged in",
+                            user: {
+                                userId: existingUser.userId,
+                                userName: existingUser.userName,
+                                email: existingUser.email,
+                                firstName: existingUser.firstName,
+                                lastName: existingUser.lastName,
+                                isActive: existingUser.isActive
+                            }
+                        });
+                    }
+                }
+            }
 
             // verify user email
             const user = await UserModel.findByEmail(email);
@@ -156,7 +188,10 @@ export class AuthController {
             await SessionModel.expireSession(sessionToken);
 
             // Update user activity status
-            await UserModel.updateUserActivity(userSession?.user_id as string, false);
+            if (userSession){
+                await UserModel.updateUserActivity(userSession?.user_id as string, false);
+            }
+            
 
             // Clear the session cookie
             res.clearCookie('sessionToken', {
