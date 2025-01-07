@@ -1,6 +1,8 @@
+//src/controllers/address.controller.ts
+
 import { Request, Response } from 'express';
 import { AddressModel } from '../model/address.model.js';
-import { AddressRequest, ErrorResponse } from '../types/address.types.js';
+import { AddressRequest, AddressType, ErrorResponse } from '../types/address.types.js';
 
 export class AddressController {
     
@@ -93,6 +95,14 @@ export class AddressController {
             const userId = req.user?.userId as string;
             const addressId = req.params.addressId as string;
 
+            const address = await AddressModel.getAddressById(addressId);
+
+            if (address.isDefault) {
+                return res.status(200).json({
+                    message: 'Address is already set as default'
+                });
+            }
+
             await AddressModel.setDefaultAddress(userId, addressId);
 
             return res.status(200).json({
@@ -113,11 +123,20 @@ export class AddressController {
     static async getDefaultAddress(req: Request, res: Response): Promise<Response> {
         try {
             const userId = req.user?.userId as string;
-            const defaultAddress = await AddressModel.getDefaultAddress(userId);
+            const addressType = req.query?.type as AddressType;
+
+            if (!addressType || !['SHIPPING', 'BILLING'].includes(addressType)) {
+                return res.status(400).json({
+                    error: 'Invalid address type',
+                    details: 'Address type must be either SHIPPING or BILLING'
+                });
+            }
+
+            const defaultAddress = await AddressModel.getDefaultAddressByType(userId, addressType);
 
             if (!defaultAddress) {
                 return res.status(404).json({
-                    message: 'Default address not found'
+                    message: `No default ${addressType.toLowerCase()} address found`
                 });
             }
 

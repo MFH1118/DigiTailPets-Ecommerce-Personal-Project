@@ -3,6 +3,7 @@
 import express, { Router } from 'express';
 import { AddressController } from '../controllers/address.controller.js';
 import { authenticateUser, validateAddressOwnership} from '../middleware/auth.middleware.js';
+import { validateAddressInput } from '../middleware/validate.middleware.js';
 
 const router: Router = express.Router();
 
@@ -10,7 +11,7 @@ const router: Router = express.Router();
 router.use(authenticateUser);
 
 // create new address route
-router.post('/', AddressController.createAddress);
+router.post('/', validateAddressInput, AddressController.createAddress);
 
 // get all addresses route
 router.get('/', AddressController.getUserAddresses);

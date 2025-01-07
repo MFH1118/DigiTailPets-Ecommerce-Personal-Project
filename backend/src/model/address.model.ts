@@ -4,34 +4,51 @@ import { Address, AddressRequest } from '../types/address.types.js';
 
 export class AddressModel {
 
-    // private function to unset default address
-    private static async unsetDefaultAddress(userId: string): Promise<void> {
-        try {
-            // check first if there is a default address
-            const defaultAddress = await prisma.address.findFirst({
-                where: {
-                    userId,
-                    isDefault: true
-                }
-            });
-            
-            if (!defaultAddress) {
-                return;
+    // private function to check address exists
+    private static async checkAddressExists(userId: string, addressData: AddressRequest): Promise<boolean> {
+        const existingAddress = await prisma.address.findFirst({
+            where: {
+                userId,
+                street1: addressData.street1,
+                street2: addressData.street2 || null,
+                city: addressData.city,
+                state: addressData.state,
+                postalCode: addressData.postalCode,
+                country: addressData.country,
+                addressType: addressData.addressType
             }
-            
+        });
+        return !!existingAddress;
+    }
+
+    // private function to check if address is already default for given type
+    private static async isAddressAlreadyDefault(userId: string, addressId: string, addressType: string): Promise<boolean> {
+        const address = await prisma.address.findFirst({
+            where: {
+                id: addressId,
+                userId,
+                addressType,
+                isDefault: true
+            }
+        });
+        return !!address;
+    }
+
+    // private function to unset default address
+    private static async unsetDefaultAddress(userId: string, addressType: string): Promise<void> {
+        try {
             await prisma.address.updateMany({
                 where: {
                     userId,
+                    addressType,
                     isDefault: true
                 },
                 data: {
                     isDefault: false
                 }
             });
-
         } catch (error: any) {
-            throw new Error(`Error unsetting default address: ${error.message as Error}`);
-            
+            throw new Error(`Error unsetting default address: ${error.message}`);
         }
     }
 
@@ -39,8 +56,14 @@ export class AddressModel {
     static async createAddress(userId: string, addressData: AddressRequest): Promise<Address> {
         try {
 
+            // check if address already exist
+            const addressExists = await this.checkAddressExists(userId, addressData);
+            if (addressExists) {
+                throw new Error('Address already exists');
+            }
+
             if (addressData.isDefault) {
-                await this.unsetDefaultAddress(userId);
+                await this.unsetDefaultAddress(userId, addressData.addressType);
             }
 
             const address = await prisma.address.create({
@@ -79,12 +102,11 @@ export class AddressModel {
                 postalCode: address.postalCode,
                 country: address.country,
                 addressType: address.addressType as 'SHIPPING' | 'BILLING',
-                isDefault: false
+                isDefault: address.isDefault
             }
 
         } catch (error: any) {
             throw new Error(`Error creating address: ${error.message as Error}`);
-            
         }
     }
 
@@ -176,12 +198,13 @@ export class AddressModel {
                 const address = await prisma.address.findUnique({
                     where: { id: addressId },
                     select: {
-                        userId: true
+                        userId: true,
+                        addressType: true
                     }
                 });
 
                 if (address) {
-                    await this.unsetDefaultAddress(address.userId);
+                    await this.unsetDefaultAddress(address.userId, address.addressType);
                 }
             }
 
@@ -234,7 +257,27 @@ export class AddressModel {
 
     static async setDefaultAddress(userId: string, addressId: string): Promise<void> {
         try {
-            await this.unsetDefaultAddress(userId);
+            // get the address type
+            const address = await prisma.address.findUnique({
+                where: { id: addressId },
+                select: { 
+                    addressType: true 
+                }
+            });
+
+            if (!address) {
+                throw new Error('Address not found');
+            }
+
+            // check if address is already default
+            const isAlreadyDefault = await this.isAddressAlreadyDefault(userId, addressId, address.addressType);
+
+            if (isAlreadyDefault) {
+                return;
+            }
+
+            // unset existing default address of the same type
+            await this.unsetDefaultAddress(userId, address.addressType);
 
             await prisma.address.update({
                 where: { id: addressId },
@@ -289,6 +332,51 @@ export class AddressModel {
             
         } catch (error: any) {
             throw new Error(`Error fetching default address: ${error.message as Error}`);
+            
+        }
+    }
+
+    static async getDefaultAddressByType(userId: string, addressType: 'SHIPPING' | 'BILLING'): Promise<Address | null> {
+        try {
+            const defaultAddress = await prisma.address.findFirst({
+                where: {
+                    userId,
+                    addressType,
+                    isDefault: true
+                },
+                select: {
+                    id: true,
+                    userId: true,
+                    street1: true,
+                    street2: true,
+                    city: true,
+                    state: true,
+                    postalCode: true,
+                    country: true,
+                    addressType: true,
+                    isDefault: true
+                }
+            });
+
+            if (!defaultAddress) {
+                return null;
+            }
+
+            return {
+                addressId: defaultAddress.id,
+                userId: defaultAddress.userId,
+                street1: defaultAddress.street1,
+                street2: defaultAddress.street2 || undefined,
+                city: defaultAddress.city,
+                state: defaultAddress.state,
+                postalCode: defaultAddress.postalCode,
+                country: defaultAddress.country,
+                addressType: defaultAddress.addressType as 'SHIPPING' | 'BILLING',
+                isDefault: defaultAddress.isDefault
+            };
+            
+        } catch (error: any) {
+            throw new Error(`Error fetching address: ${error.message as Error}`);
             
         }
     }
