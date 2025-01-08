@@ -86,3 +86,40 @@ model Session {
 
   @@map("sessions")
 }
+
+model Product {
+  id              String         @id @default(uuid()) @map("prod_id")
+  name            String         @map("prod_name")
+  description     String?        @map("prod_desc")
+  price           Decimal        @map("prod_price") @db.Decimal(10, 2)
+  stockQuantity   Int            @map("prod_stock_quantity")
+  isActive        Boolean        @default(true) @map("prod_is_active")
+  sku             String         @unique @map("prod_sku")
+  imageUrl        String?        @map("prod_image_url")
+  dateAdded       DateTime       @default(now()) @map("prod_added_date")
+  dateModified    DateTime?      @map("prod_modified_date") @updatedAt
+
+  // Relations
+  category        Category       @relation(fields: [categoryId], references: [id])
+  categoryId      String         @map("category_id")
+
+  // Indexes
+  @@index([categoryId])
+  @@index([sku])
+  @@index([isActive])
+  
+  @@map("products")
+}
+
+model Category {
+  id          String    @id @default(uuid()) @map("category_id")
+  name        String    @unique @map("category_name")
+  description String?   @map("category_desc")
+  isActive    Boolean   @default(true) @map("category_is_active")
+
+  // Relations
+  products    Product[]
+
+  @@index([isActive])
+  @@map("categories")
+}
