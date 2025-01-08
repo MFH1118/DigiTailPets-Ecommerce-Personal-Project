@@ -23,3 +23,7 @@ logs/
 
 # OS generated files
 .DS_Store
+
+# pdf or word files
+*.pdf
+*.docx
