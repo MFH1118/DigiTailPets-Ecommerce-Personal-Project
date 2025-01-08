@@ -3,6 +3,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserRegistrationRequest, ErrorResponse } from '../types/user.types.js';
 import { AddressRequest } from '../types/address.types.js';
+import { ProductRequest } from '../types/product.types.js';
+import { CategoryRequest } from '../types/category.types.js';
 
 export const validateRegistrationInput = async (req: Request, res: Response, next: NextFunction) => {
     const { userName, email, firstName, lastName, dob, password }: UserRegistrationRequest = req.body;
@@ -102,3 +104,107 @@ export const validateAddressInput = async (req: Request, res: Response, next: Ne
     next();
 
 }
+
+export const validateProductInput = async (req: Request, res: Response, next: NextFunction) => {
+    const { name, description, price, stockQuantity, sku, categoryId }: ProductRequest = req.body;
+
+    // check required fields
+    if (!name || !price || stockQuantity === undefined || !sku || !categoryId) {
+        const errorResponse: ErrorResponse = {
+            error: 'Missing required fields',
+            details: 'Name, price, stock quantity, SKU, and category ID are required'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate name length
+    if (name.length < 2 || name.length > 100) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid name length',
+            details: 'Product name must be between 2 and 100 characters'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate price
+    if (typeof price !== 'number' || price <= 0) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid price',
+            details: 'Price must be a positive number'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate stock quantity
+    if (!Number.isInteger(stockQuantity) || stockQuantity < 0) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid stock quantity',
+            details: 'Stock quantity must be a non-negative integer'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate SKU format (alphanumeric, uppercase, no spaces)
+    const skuRegex = /^[A-Z0-9-]+$/;
+    if (!skuRegex.test(sku)) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid SKU format',
+            details: 'SKU must contain only uppercase letters, numbers, and hyphens'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate description length if provided
+    if (description && description.length > 1000) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid description length',
+            details: 'Description must not exceed 1000 characters'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    next();
+}
+
+export const validateCategoryInput = async (req: Request, res: Response, next: NextFunction) => {
+    const { name, description }: CategoryRequest = req.body;
+
+    // check required fields
+    if (!name) {
+        const errorResponse: ErrorResponse = {
+            error: 'Missing required fields',
+            details: 'Category name is required'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate name length
+    if (name.length < 2 || name.length > 50) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid name length',
+            details: 'Category name must be between 2 and 50 characters'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate name format (alphanumeric and spaces only)
+    const nameRegex = /^[a-zA-Z0-9\s-&]+$/;
+    if (!nameRegex.test(name)) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid name format',
+            details: 'Category name can only contain letters, numbers, spaces, hyphens, and ampersands'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate description length if provided
+    if (description && description.length > 500) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid description length',
+            details: 'Description must not exceed 500 characters'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    next();
+};
