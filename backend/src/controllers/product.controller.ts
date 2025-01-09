@@ -12,6 +12,8 @@ export class ProductController {
 
             const productData: ProductRequest = req.body;
 
+            console.log(productData);
+
             // validate if category exists and is active
             const isValidCategory = await CategoryModel.isValidCategory(productData.categoryId);
             
@@ -45,6 +47,12 @@ export class ProductController {
     // get products with filtering
     static async getProducts(req: Request, res: Response): Promise<Response> {
         try {
+
+            if (Object.keys(req.query).length === 0) {
+                const result = await ProductModel.getProducts({});
+                return res.status(200).json(result);
+            }
+
             const { categoryId, minPrice, maxPrice, isActive, searchTerm, sortBy, sortOrder, page, limit } = req.query;
 
             const result = await ProductModel.getProducts({
