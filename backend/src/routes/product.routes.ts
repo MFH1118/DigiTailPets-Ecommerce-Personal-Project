@@ -19,7 +19,7 @@ router.get('/', ProductController.getProducts);
 router.get('/:productId', ProductController.getProductById);
 
 // update product TODO: add authorization admin only
-router.put('/:productId', validateProductInput, ProductController.updateProduct);
+router.put('/:productId', ProductController.updateProduct);
 
 // update stock quantity TODO: add authorization admin only
 router.patch('/:productId/stock', ProductController.updateStock);
