@@ -5,6 +5,7 @@ import { UserRegistrationRequest, ErrorResponse } from '../types/user.types.js';
 import { AddressRequest } from '../types/address.types.js';
 import { ProductRequest } from '../types/product.types.js';
 import { CategoryRequest } from '../types/category.types.js';
+import { CartItemRequest } from '../types/cart.types.js';
 
 export const validateRegistrationInput = async (req: Request, res: Response, next: NextFunction) => {
     const { userName, email, firstName, lastName, dob, password }: UserRegistrationRequest = req.body;
@@ -204,6 +205,77 @@ export const validateCategoryInput = async (req: Request, res: Response, next: N
             details: 'Description must not exceed 500 characters'
         };
         return res.status(400).json(errorResponse);
+    }
+
+    next();
+};
+
+export const validateCartItemInput = async (req: Request, res: Response, next: NextFunction) => {
+    // extract data based on request type
+    const cartItemData: CartItemRequest = req.method === 'PUT' 
+        ? { quantity: req.body.quantity } 
+        : req.body;
+
+    // for POST requests (adding new items)
+    if (req.method === 'POST') {
+        if (!cartItemData.productId) {
+            const errorResponse: ErrorResponse = {
+                error: 'Missing required fields',
+                details: 'Product ID is required'
+            };
+            return res.status(400).json(errorResponse);
+        }
+
+        // validate product ID format (UUID)
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(cartItemData.productId)) {
+            const errorResponse: ErrorResponse = {
+                error: 'Invalid product ID format',
+                details: 'Product ID must be a valid UUID'
+            };
+            return res.status(400).json(errorResponse);
+        }
+    }
+
+    // validate quantity for both POST and PUT
+    if (typeof cartItemData.quantity !== 'number') {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid quantity format',
+            details: 'Quantity must be a number'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate quantity range
+    const MAX_QUANTITY = 99;
+    if (cartItemData.quantity < 0 || cartItemData.quantity > MAX_QUANTITY) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid quantity value',
+            details: `Quantity must be between 0 and ${MAX_QUANTITY}`
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // for PUT requests, validate cart item ID
+    if (req.method === 'PUT') {
+        const cartItemId = req.params.cartItemId;
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+        if (!cartItemId) {
+            const errorResponse: ErrorResponse = {
+                error: 'Missing cart item ID',
+                details: 'Cart item ID is required for updates'
+            };
+            return res.status(400).json(errorResponse);
+        }
+
+        if (!uuidRegex.test(cartItemId)) {
+            const errorResponse: ErrorResponse = {
+                error: 'Invalid cart item ID format',
+                details: 'Cart item ID must be a valid UUID'
+            };
+            return res.status(400).json(errorResponse);
+        }
     }
 
     next();
