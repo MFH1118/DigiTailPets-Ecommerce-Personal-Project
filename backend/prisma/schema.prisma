@@ -27,13 +27,14 @@ model User {
   authentication  Authentication?
   sessions        Session[]      
   addresses       Address[]
+  cart            Cart?
 
   @@map("users")
 }
 
 model Address {
   id          String   @id @default(uuid()) @map("address_id")
-  street1      String   @map("address_street_1")
+  street1     String   @map("address_street_1")
   street2     String?  @map("address_street_2")
   city        String   @map("address_city")
   state       String   @map("address_state")
@@ -102,6 +103,7 @@ model Product {
   // Relations
   category        Category       @relation(fields: [categoryId], references: [id])
   categoryId      String         @map("category_id")
+  cartItems       CartItem[]
 
   // Indexes
   @@index([categoryId])
@@ -122,4 +124,35 @@ model Category {
 
   @@index([isActive])
   @@map("categories")
+}
+
+model Cart {
+  id              String      @id @default(uuid()) @map("cart_id")
+  creationDate    DateTime    @default(now()) @map("cart_creation_date")
+  lastUpdate      DateTime    @updatedAt @map("cart_last_update")
+  
+  // Relations
+  user            User        @relation(fields: [userId], references: [id])
+  userId          String      @unique @map("user_id")
+  items           CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id          String    @id @default(uuid()) @map("cart_item_id")
+  quantity    Int       @map("cart_item_quantity")
+  unitPrice   Decimal   @map("cart_item_unitprice") @db.Decimal(10, 2)
+  subtotal    Decimal   @map("cart_item_subtotal") @db.Decimal(10, 2)
+
+  // Relations
+  cart        Cart      @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId      String    @map("cart_id")
+  product     Product   @relation(fields: [productId], references: [id])
+  productId   String    @map("prod_id")
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@index([productId])
+  @@map("cart_items")
 }
