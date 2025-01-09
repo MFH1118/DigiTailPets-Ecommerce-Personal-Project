@@ -27,3 +27,5 @@ router.get('/summary', CartController.getCartSummary);
 
 // validate cart items route
 router.post('/validate', CartController.validateCart);
+
+export default router;

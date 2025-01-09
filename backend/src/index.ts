@@ -12,6 +12,7 @@ import { getSessionTypeInfo } from './utils/session-type.utils.js';
 import useragent from 'express-useragent';
 import cookieParser from 'cookie-parser';
 import addressRoutes from './routes/address.routes.js';
+import cartRoutes from './routes/cart.routes.js';
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/cart', cartRoutes);
 app.use(useragent.express());
 
 // Routes
