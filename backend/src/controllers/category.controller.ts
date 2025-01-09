@@ -31,6 +31,12 @@ export class CategoryController {
     // get categories with filtering
     static async getCategories(req: Request, res: Response): Promise<Response> {
         try {
+
+            if (Object.keys(req.query).length === 0) {
+                const result = await CategoryModel.getCategories({});
+                return res.status(200).json(result);
+            }
+
             const {
                 searchTerm,
                 isActive,
@@ -49,12 +55,7 @@ export class CategoryController {
                 limit: limit ? Number(limit) : undefined
             });
 
-            return res.status(200).json({
-                categories: result.categories,
-                total: result.total,
-                page: page ? Number(page) : 1,
-                limit: limit ? Number(limit) : 10
-            });
+            return res.status(200).json(result);
             
         } catch (error: any) {
             const errorResponse: ErrorResponse = {

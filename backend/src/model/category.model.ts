@@ -70,7 +70,7 @@ export class CategoryModel {
     }
 
     // Get categories with filtering and pagination
-    static async getCategories(options: CategoryFilterOptions): Promise<{categories: Category[], total: number}> {
+    static async getCategories(options: CategoryFilterOptions = {}): Promise<{categories: Category[], total: number, page: number, limit: number}> {
         try {
             const {
                 searchTerm,
@@ -81,17 +81,18 @@ export class CategoryModel {
                 limit = 10
             } = options;
 
-            const where: Prisma.CategoryWhereInput = {
-                AND: [
-                    isActive !== undefined ? { isActive } : {},
-                    searchTerm ? {
-                        OR: [
-                            { name: { contains: searchTerm, mode: 'insensitive' } },
-                            { description: { contains: searchTerm, mode: 'insensitive' } }
-                        ]
-                    } : {}
-                ]
-            };
+            const where: Prisma.CategoryWhereInput = {};
+
+            if (isActive !== undefined) {
+                where.isActive = isActive;
+            }
+            
+            if (searchTerm) {
+                where.OR = [
+                    { name: { contains: searchTerm, mode: 'insensitive' } },
+                    { description: { contains: searchTerm, mode: 'insensitive' } }
+                ];
+            }
 
             const total = await prisma.category.count({ where });
 
@@ -115,7 +116,9 @@ export class CategoryModel {
                     description: category.description ?? undefined,
                     isActive: category.isActive
                 })),
-                total
+                total,
+                page,
+                limit
             };
 
         } catch (error: any) {
@@ -216,6 +219,8 @@ export class CategoryModel {
                     isActive: true
                 }
             });
+
+            console.log(category);
 
             return !!category;
 

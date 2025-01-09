@@ -101,7 +101,7 @@ export class ProductModel {
     }
 
     // get products with filtering options
-    static async getProducts(options: ProductFilterOptions): Promise<{products: Product[], total: number}> {
+    static async getProducts(options: ProductFilterOptions= {}): Promise<{products: Product[], total: number}> {
         try {
             const {
                 categoryId,
@@ -115,26 +115,31 @@ export class ProductModel {
                 limit = 10
             } = options;
 
-            const where: Prisma.ProductWhereInput = {
-                AND: [
-                    categoryId ? { categoryId } : {},
-                    isActive !== undefined ? { isActive } : {},
-                    minPrice || maxPrice ? {
-                        price: {
-                            gte: minPrice ? new Prisma.Decimal(minPrice.toString()) : undefined,
-                            lte: maxPrice ? new Prisma.Decimal(maxPrice.toString()) : undefined
-                        }
-                    } : {},
-                    searchTerm ? {
-                        OR: [
-                            { name: { contains: searchTerm, mode: 'insensitive' } },
-                            { description: { contains: searchTerm, mode: 'insensitive' } },
-                            { sku: { contains: searchTerm, mode: 'insensitive' } }
-                        ]
-                    } : {}
-                ]
-            };
+            const where: Prisma.ProductWhereInput = {};
 
+            if (categoryId) {
+                where.categoryId = categoryId;
+            }
+
+            if (isActive !== undefined) {
+                where.isActive = isActive;
+            }
+
+            if (minPrice || maxPrice) {
+                where.price = {
+                    gte: minPrice ? new Prisma.Decimal(minPrice.toString()) : undefined,
+                    lte: maxPrice ? new Prisma.Decimal(maxPrice.toString()) : undefined
+                };
+            }
+
+            if (searchTerm) {
+                where.OR = [
+                    { name: { contains: searchTerm, mode: 'insensitive' } },
+                    { description: { contains: searchTerm, mode: 'insensitive' } },
+                    { sku: { contains: searchTerm, mode: 'insensitive' } }
+                ];
+            }
+            
             const total = await prisma.product.count({ where });
 
             const products = await prisma.product.findMany({
