@@ -28,6 +28,7 @@ model User {
   sessions        Session[]      
   addresses       Address[]
   cart            Cart?
+  wishList        WishList?
 
   @@map("users")
 }
@@ -98,12 +99,13 @@ model Product {
   sku             String         @unique @map("prod_sku")
   imageUrl        String?        @map("prod_image_url")
   dateAdded       DateTime       @default(now()) @map("prod_added_date")
-  dateModified    DateTime?      @map("prod_modified_date") @updatedAt
+  dateModified    DateTime?      @updatedAt @map("prod_modified_date") 
 
   // Relations
   category        Category       @relation(fields: [categoryId], references: [id])
   categoryId      String         @map("category_id")
   cartItems       CartItem[]
+  wishListItems   WishListItem[]
 
   // Indexes
   @@index([categoryId])
@@ -155,4 +157,34 @@ model CartItem {
   @@index([cartId])
   @@index([productId])
   @@map("cart_items")
+}
+
+model WishList {
+  id            String         @id @default(uuid()) @map("wishlist_id")
+  dateCreated   DateTime       @default(now()) @map("wishlist_creation_date")
+  lastUpdated   DateTime       @updatedAt @map("wishlist_last_update")
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id])
+  userId        String         @unique @map("user_id")
+  items         WishListItem[]
+
+  @@map("wishlists")
+  @@index([userId])
+}
+
+model WishListItem {
+  id          String    @id @default(uuid()) @map("wishlist_item_id")
+  dateAdded   DateTime  @default(now()) @map("wishlist_item_adddate")
+  
+  // Relations
+  wishList    WishList  @relation(fields: [wishListId], references: [id])
+  wishListId  String    @map("wishlist_id")
+  product     Product   @relation(fields: [productId], references: [id])
+  productId   String    @map("prod_id")
+
+  @@map("wishlist_items")
+  @@unique([wishListId, productId])
+  @@index([productId])
+  @@index([wishListId])
 }
