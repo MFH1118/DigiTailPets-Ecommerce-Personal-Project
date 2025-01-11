@@ -22,11 +22,11 @@ export interface WishListItem {
 }
 
 // Request types
-export interface CreateWishListRequest {
+export interface WishListRequest {
     userId: string;
 }
 
-export interface AddWishListItemRequest {
+export interface WishListItemRequest {
     productId: string;
 }
 
