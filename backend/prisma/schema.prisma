@@ -29,6 +29,8 @@ model User {
   addresses       Address[]
   cart            Cart?
   wishList        WishList?
+  orders          Order[]
+  payments        PaymentDetails[]
 
   @@map("users")
 }
@@ -49,6 +51,7 @@ model Address {
   userId      String   @map("user_id")
 
   @@map("addresses")
+  @@index([userId, addressType])
 }
 
 model Role {
@@ -87,6 +90,7 @@ model Session {
   user              User      @relation(fields: [userId], references: [id])
 
   @@map("sessions")
+  @@index([userId, expiry])
 }
 
 model Product {
@@ -106,13 +110,13 @@ model Product {
   categoryId      String         @map("category_id")
   cartItems       CartItem[]
   wishListItems   WishListItem[]
+  orderItems      OrderItem[]
 
-  // Indexes
+  @@map("products")
   @@index([categoryId])
   @@index([sku])
   @@index([isActive])
-  
-  @@map("products")
+  @@index([price])
 }
 
 model Category {
@@ -124,8 +128,8 @@ model Category {
   // Relations
   products    Product[]
 
-  @@index([isActive])
   @@map("categories")
+  @@index([isActive])
 }
 
 model Cart {
@@ -153,10 +157,10 @@ model CartItem {
   product     Product   @relation(fields: [productId], references: [id])
   productId   String    @map("prod_id")
 
+  @@map("cart_items")
   @@unique([cartId, productId])
   @@index([cartId])
   @@index([productId])
-  @@map("cart_items")
 }
 
 model WishList {
@@ -187,4 +191,114 @@ model WishListItem {
   @@unique([wishListId, productId])
   @@index([productId])
   @@index([wishListId])
+}
+
+model Order {
+  id              String         @id @default(uuid()) @map("order_id")
+  orderDate       DateTime       @default(now()) @map("order_date")
+  orderTotal      Decimal        @map("order_total") @db.Decimal(10, 2)
+  orderStatus     OrderStatus    @default(PENDING) @map("order_status")
+  paymentStatus   PaymentStatus  @default(PENDING) @map("payment_status")
+  lastUpdated     DateTime       @updatedAt @map("last_updated")
+
+  // Relations
+  user            User           @relation(fields: [userId], references: [id])
+  userId          String         @map("user_id")
+  payment         PaymentDetails?
+  shipment        Shipments?     @relation(fields: [shippingId], references: [id])
+  shippingId      String?        @unique @map("shipping_id")
+  orderItems      OrderItem[]
+
+  @@map("orders")
+  @@index([userId])
+  @@index([orderStatus])
+  @@index([orderDate])
+  @@index([paymentStatus])
+}
+
+model OrderItem {
+  id              String    @id @default(uuid()) @map("order_item_id")
+  quantity        Int       @map("order_quantity")
+  unitPrice       Decimal   @map("order_unitprice") @db.Decimal(10, 2)
+  subtotal        Decimal   @map("order_subtotal") @db.Decimal(10, 2)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId         String    @map("order_id")
+  product         Product   @relation(fields: [productId], references: [id])
+  productId       String    @map("product_id")
+
+  @@map("order_items")
+  @@index([orderId])
+  @@index([productId])
+}
+
+model PaymentDetails {
+  id                    String         @id @default(uuid()) @map("payment_id")
+  userId                String         @map("user_id")
+  amount                Decimal        @map("payment_amount") @db.Decimal(10, 2)
+  currency              String         @map("payment_currency")
+  method                String         @map("payment_method")
+  provider              String         @map("payment_provider")
+  status                PaymentStatus  @default(PENDING) @map("payment_status")
+  transactionDate      DateTime        @default(now()) @map("payment_transaction_date")
+  authorizationCode    String?         @map("payment_authorization_code")
+  lastFourDigits       String?         @map("payment_four_digit_num")
+  expirationDate       DateTime?       @map("payment_expiration_date")
+  
+  // Relations
+  user                 User            @relation(fields: [userId], references: [id])
+  order                Order?          @relation(fields: [orderId], references: [id])
+  orderId              String?         @unique @map("order_id")
+
+  @@map("payment_details")
+  @@index([userId])
+  @@index([status])
+  @@index([transactionDate])
+}
+
+model Shipments {
+  id                String          @id @default(uuid()) @map("shipment_id")
+  carrier           String          @map("shipment_carrier")
+  trackingNumber    String?         @map("shipment_tracking_num")
+  shipmentDate      DateTime        @default(now()) @map("shipment_date")
+  estimatedDelivery DateTime?       @map("shipment_est_delivery")
+  actualDelivery    DateTime?       @map("shipment_actual_delivery")
+  status            ShipmentStatus  @default(PENDING) @map("shipment_status")
+  
+  // Relations
+  order             Order?
+
+  @@map("shipments")
+  @@index([status])
+  @@index([shipmentDate])
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum ShipmentStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  IN_TRANSIT
+  DELIVERED
+  FAILED
+  RETURNED
 }
