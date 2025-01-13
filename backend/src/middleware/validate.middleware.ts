@@ -6,6 +6,7 @@ import { AddressRequest } from '../types/address.types.js';
 import { ProductRequest } from '../types/product.types.js';
 import { CategoryRequest } from '../types/category.types.js';
 import { CartItemRequest } from '../types/cart.types.js';
+import { CreateOrderRequest, OrderStatus, PaymentStatus } from '../types/order.types.js';
 
 export const validateRegistrationInput = async (req: Request, res: Response, next: NextFunction) => {
     const { userName, email, firstName, lastName, dob, password }: UserRegistrationRequest = req.body;
@@ -276,6 +277,83 @@ export const validateCartItemInput = async (req: Request, res: Response, next: N
             };
             return res.status(400).json(errorResponse);
         }
+    }
+
+    next();
+};
+
+export const validateOrderInput = async (req: Request, res: Response, next: NextFunction) => {
+    const orderData: CreateOrderRequest = req.body;
+
+    // check if items array exists and is not empty
+    if (!orderData.items || !Array.isArray(orderData.items) || orderData.items.length === 0) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid order data',
+            details: 'Order must contain at least one item'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate each item in the order
+    for (const item of orderData.items) {
+        if (!item.productId || !item.quantity || !item.unitPrice) {
+            const errorResponse: ErrorResponse = {
+                error: 'Invalid order item',
+                details: 'Each item must have a productId, quantity, and unitPrice'
+            };
+            return res.status(400).json(errorResponse);
+        }
+
+        // validate quantity
+        if (item.quantity <= 0 || !Number.isInteger(item.quantity)) {
+            const errorResponse: ErrorResponse = {
+                error: 'Invalid quantity',
+                details: 'Quantity must be a positive integer'
+            };
+            return res.status(400).json(errorResponse);
+        }
+
+        // validate unit price
+        if (typeof item.unitPrice !== 'number' || item.unitPrice <= 0) {
+            const errorResponse: ErrorResponse = {
+                error: 'Invalid unit price',
+                details: 'Unit price must be a positive number'
+            };
+            return res.status(400).json(errorResponse);
+        }
+    }
+
+    // validate shipping ID if provided
+    if (orderData.shippingId && typeof orderData.shippingId !== 'string') {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid shipping ID',
+            details: 'Shipping ID must be a string'
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    next();
+};
+
+export const validateOrderStatusUpdate = async (req: Request, res: Response, next: NextFunction) => {
+    const { orderStatus, paymentStatus } = req.body;
+
+    // validate order status if provided
+    if (orderStatus && !Object.values(OrderStatus).includes(orderStatus)) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid order status',
+            details: `Status must be one of: ${Object.values(OrderStatus).join(', ')}`
+        };
+        return res.status(400).json(errorResponse);
+    }
+
+    // validate payment status if provided
+    if (paymentStatus && !Object.values(PaymentStatus).includes(paymentStatus)) {
+        const errorResponse: ErrorResponse = {
+            error: 'Invalid payment status',
+            details: `Payment status must be one of: ${Object.values(PaymentStatus).join(', ')}`
+        };
+        return res.status(400).json(errorResponse);
     }
 
     next();
