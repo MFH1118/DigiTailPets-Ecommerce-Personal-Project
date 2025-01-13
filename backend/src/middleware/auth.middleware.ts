@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 import { SessionModel } from '../model/session.model.js';
 import { ErrorResponse} from '../types/user.types.js';
 import { AddressModel } from '../model/address.model.js';
+import prisma from '../db/prisma.js';
 
 export const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -82,5 +83,43 @@ export const validateAddressOwnership = async (req: Request, res: Response, next
 
         return res.status(500).json(errorResponse);
         
+    }
+};
+
+export const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            const errorResponse: ErrorResponse = {
+                error: "Authentication required",
+                details: "User ID not found"
+            };
+            return res.status(401).json(errorResponse);
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                role: true
+            }
+        });
+
+        if (!user || user.role.name !== 'ADMIN') {
+            const errorResponse: ErrorResponse = {
+                error: "Unauthorized",
+                details: "Admin access required"
+            };
+            return res.status(403).json(errorResponse);
+        }
+
+        next();
+        
+    } catch (error: any) {
+        const errorResponse: ErrorResponse = {
+            error: "Error checking admin status",
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        };
+        return res.status(500).json(errorResponse);
     }
 };
