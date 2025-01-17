@@ -27,3 +27,8 @@ logs/
 # pdf or word files
 *.pdf
 *.docx
+*.mmd
+
+# pictures
+*.jpg
+*.png
