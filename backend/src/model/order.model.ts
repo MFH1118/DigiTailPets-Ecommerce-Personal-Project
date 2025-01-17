@@ -3,220 +3,307 @@ import { Prisma } from '@prisma/client';
 import { Order, OrderItem, OrderStatus, PaymentStatus, CreateOrderRequest, OrderFilterOptions, OrderSummary} from '../types/order.types.js';
 
 export class OrderModel {
+    
+    // private common order response
+    private static orderResponse(order: any): Order {
+        return {
+            orderId: order.id,
+            userId: order.userId,
+            orderDate: order.orderDate,
+            orderTotal: order.orderTotal,
+            orderStatus: order.orderStatus as OrderStatus,
+            paymentStatus: order.paymentStatus as PaymentStatus,
+            lastUpdated: order.lastUpdated,
+            shippingId: order.shippingId ?? undefined,
+            items: order.orderItems.map((item: any) => ({
+                orderItemId: item.id,
+                orderId: item.orderId,
+                productId: item.productId,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                subtotal: item.subtotal,
+                createdAt: item.createdAt,
+                updatedAt: item.updatedAt
+            }))
+        };
+    }
 
-    //
+    // private order status count
+    private static initializeOrderStatusCounts(statusCounts: { orderStatus: string; _count: number; }[]): Record<OrderStatus, number> {
+        const ordersByStatus = Object.values(OrderStatus).reduce((acc, status) => {
+            acc[status] = 0;
+            return acc;
+        }, {} as Record<OrderStatus, number>);
 
-    // create new order with items
+        statusCounts.forEach(({ orderStatus, _count }) => {
+            ordersByStatus[orderStatus as OrderStatus] = _count;
+        });
+
+        return ordersByStatus;
+    }
+
+    // customer functions
+
+    // customer create order 
     static async createOrder(orderData: CreateOrderRequest): Promise<Order> {
         try {
-            const transaction = await prisma.$transaction(async (tx) => {
-                // calculate order total from items
-                const orderTotal = orderData.items.reduce((total, item) => {
-                    return total.add(new Prisma.Decimal(item.unitPrice).mul(item.quantity));
-                }, new Prisma.Decimal(0));
+            // validate product availability
+            const productsAvailability = await prisma.product.findMany({
+                where: {
+                    id: { in: orderData.items.map(item => item.productId) },
+                    isActive: true,
+                    stockQuantity: { gt: 0 }
+                },
+                select: {
+                    id: true,
+                    stockQuantity: true,
+                    price: true
+                }
+            });
 
-                // create order
-                const order = await tx.order.create({
-                    data: {
-                        userId: orderData.userId,
-                        orderTotal,
-                        shippingId: orderData.shippingId,
-                        orderItems: {
-                            create: orderData.items.map(item => ({
+            // map products
+            const productMap = new Map(
+                productsAvailability.map(p => [p.id, { stock: p.stockQuantity, price: p.price }])
+            );
+
+            // validate all products exist and have sufficient stock
+            for (const item of orderData.items) {
+                const product = productMap.get(item.productId);
+                if (!product) {
+                    throw new Error(`Product ${item.productId} is not available`);
+                }
+                if (product.stock < item.quantity) {
+                    throw new Error(`Insufficient stock for product ${item.productId}`);
+                }
+            }
+
+            // calculate order total
+            const orderTotal = orderData.items.reduce((total, item) => {
+                const product = productMap.get(item.productId)!;
+                return total.add(product.price.mul(item.quantity));
+            }, new Prisma.Decimal(0));
+
+            // create order
+            const order = await prisma.order.create({
+                data: {
+                    userId: orderData.userId,
+                    orderTotal,
+                    orderStatus: OrderStatus.PENDING,
+                    shippingId: orderData.shippingId,
+                    orderItems: {
+                        create: orderData.items.map(item => {
+                            const product = productMap.get(item.productId)!;
+                            return {
                                 productId: item.productId,
                                 quantity: item.quantity,
-                                unitPrice: new Prisma.Decimal(item.unitPrice),
-                                subtotal: new Prisma.Decimal(item.unitPrice).mul(item.quantity)
-                            }))
-                        }
-                    },
-                    include: {
-                        orderItems: true
+                                unitPrice: product.price,
+                                subtotal: product.price.mul(item.quantity)
+                            };
+                        })
                     }
-                });
-
-                // loop product stock quantities and update products
-                for (const item of orderData.items) {
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: {
-                            stockQuantity: {
-                                decrement: item.quantity
-                            }
-                        }
-                    });
-                }
-
-                return {
-                    orderId: order.id,
-                    userId: order.userId,
-                    orderDate: order.orderDate,
-                    orderTotal: order.orderTotal,
-                    orderStatus: order.orderStatus as OrderStatus,
-                    paymentStatus: order.paymentStatus as PaymentStatus,
-                    lastUpdated: order.lastUpdated,
-                    shippingId: order.shippingId ?? undefined,
-                    items: order.orderItems.map(item => ({
-                        orderItemId: item.id,
-                        orderId: item.orderId,
-                        productId: item.productId,
-                        quantity: item.quantity,
-                        unitPrice: item.unitPrice,
-                        subtotal: item.subtotal,
-                        createdAt: item.createdAt,
-                        updatedAt: item.updatedAt
-                    }))
-                };
-            });
-
-            return transaction;
-
-        } catch (error: any) {
-
-            throw new Error(`Error creating order: ${error.message}`);
-            
-        }
-    }
-
-    // get order by id
-    static async getOrderById(orderId: string): Promise<Order | null>{
-        try {
-
-            // check if order exists
-            const order = await prisma.order.findUnique({
-                where: { id: orderId },
+                },
                 include: {
                     orderItems: true
-                },
-                
+                }
             });
 
-            if (!order) {
-                return null;
-            }
-
-            return {
-                orderId: order.id,
-                userId: order.userId,
-                orderDate: order.orderDate,
-                orderTotal: order.orderTotal,
-                orderStatus: order.orderStatus as OrderStatus,
-                paymentStatus: order.paymentStatus as PaymentStatus,
-                lastUpdated: order.lastUpdated,
-                shippingId: order.shippingId ?? undefined,
-                items: order.orderItems.map(item => ({
-                    orderItemId: item.id,
-                    orderId: item.orderId,
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    unitPrice: item.unitPrice,
-                    subtotal: item.subtotal,
-                    createdAt: item.createdAt,
-                    updatedAt: item.updatedAt
-                }))
-            };
-
+            return this.orderResponse(order);
             
         } catch (error: any) {
-
-            throw new Error(`Error getting order: ${error.message}`);
+            throw new Error(`Error creating order: ${error.message}`);
         }
     }
 
-    // get orders with filtering and pagination
-    static async getOrders(options: OrderFilterOptions = {}): Promise<{ orders: Order[], total: number }> {
+    // get customer order
+    static async getCustomerOrder(orderId: string, userId: string): Promise<Order | null> {
         try {
-            const {
-                userId,
-                orderStatus,
-                paymentStatus,
-                startDate,
-                endDate,
-                minTotal,
-                maxTotal,
-                sortBy = 'orderDate',
-                sortOrder = 'desc',
-                page = 1,
-                limit = 10
-            } = options;
+            
+            // find the order of the customer
+            const order = await prisma.order.findFirst({
+                where: {
+                    id: orderId,
+                    userId: userId
+                },
+                include: {
+                    orderItems: true
+                }
+            });
 
+            // check if the order is not found
+            if (!order) {
+
+                return null;
+
+            } 
+
+            // return the order
+            return this.orderResponse(order);
+
+        } catch (error: any) {
+            throw new Error(`Error getting customer order: ${error.message}`);
+        }
+    }
+
+    // get customer order history
+    static async getCustomerOrderHistory(userId: string, limit: number = 10, cursor?: string): Promise<Order[]> {
+        try {
+            // find all orders of the customer
+            const orders = await prisma.order.findMany({
+                where: { userId },
+                take: limit,
+                skip: cursor ? 1 : 0,
+                cursor: cursor ? { id: cursor } : undefined,
+                orderBy: { orderDate: 'desc' },
+                include: { orderItems: true }
+            });
+
+            // return a map of all customer orders 
+            return orders.map(order => this.orderResponse(order));
+
+        } catch (error: any) {
+            throw new Error(`Error getting user order history: ${error.message}`);
+        }
+    }
+
+    // cancel customer order
+    static async cancelCustomerOrder(orderId: string, userId: string): Promise<Order> {
+        try {
+
+            // find the order of the customer
+            const order = await prisma.order.findFirst({
+                where: {
+                    id: orderId,
+                    userId: userId,
+                    orderStatus: {
+                        notIn: [OrderStatus.CANCELLED, OrderStatus.DELIVERED, OrderStatus.REFUNDED]
+                    }
+                },
+                include: {
+                    orderItems: true
+                }
+            });
+
+            // check if the order is not found
+            if (!order) {
+                throw new Error('Order not found');
+            }
+
+            // cancel the order
+            const cancelledOrder = await prisma.order.update({
+                where: { id: orderId },
+                data: {
+                    orderStatus: OrderStatus.CANCELLED,
+                    paymentStatus: PaymentStatus.CANCELLED,
+                    lastUpdated: new Date()
+                },
+                include: { 
+                    orderItems: true
+                }
+            });
+
+            return this.orderResponse(cancelledOrder);
+            
+        } catch (error: any) {
+            throw new Error(`Error cancelling customer order: ${error.message}`);
+            
+        }
+    }
+
+    // admin functions
+
+    // get all orders
+    static async getAllOrders(options: OrderFilterOptions = {}): Promise<{orders: Order[], total: number}>{
+        try {
+
+            // initialise where clause
             const where: Prisma.OrderWhereInput = {};
 
-            if (userId) {
-                where.userId = userId;
+            // build where clause
+            if (options.userId) {
+                where.userId = options.userId;
             }
 
-            if (orderStatus) {
-                where.orderStatus = orderStatus;
+            if (options.orderStatus) {
+                where.orderStatus = options.orderStatus;
             }
 
-            if (paymentStatus) {
-                where.paymentStatus = paymentStatus;
+            if (options.paymentStatus) {
+                where.paymentStatus = options.paymentStatus;
             }
 
-            if (startDate || endDate) {
+            if(options.startDate || options.endDate) {
                 where.orderDate = {
-                    gte: startDate,
-                    lte: endDate
+                    gte: options.startDate,
+                    lte: options.endDate
                 };
             }
 
-            if (minTotal || maxTotal) {
+            if (options.minTotal || options.maxTotal) {
                 where.orderTotal = {
-                    gte: minTotal ? new Prisma.Decimal(minTotal) : undefined,
-                    lte: maxTotal ? new Prisma.Decimal(maxTotal) : undefined
-                };
+                    gte: options.minTotal ? new Prisma.Decimal(options.minTotal) : undefined,
+                    lte: options.maxTotal ? new Prisma.Decimal(options.maxTotal) : undefined
+                }
             }
 
-            const total = await prisma.order.count({ where });
+            // find all orders
+            const [orders, total] = await Promise.all([
+                prisma.order.findMany({
+                    where,
+                    include: {
+                        orderItems: true
+                    },
+                    orderBy: {
+                        [options.sortBy || 'orderDate']: options.sortOrder || 'desc'
+                    },
+                    skip: options.page ? (options.page - 1) * (options.limit || 10) : undefined,
+                    take: options.limit
+                }),
+                prisma.order.count({ where })
+            ]);
 
-            const orders = await prisma.order.findMany({
-                where,
-                include: {
-                    orderItems: true
-                },
-                orderBy: {
-                    [sortBy]: sortOrder,
-                    orderDate: 'desc'
-                },
-                skip: (page - 1) * limit,
-                take: limit
-            });
-
+            // return orders
             return {
-                orders: orders.map(order => ({
-                    orderId: order.id,
-                    userId: order.userId,
-                    orderDate: order.orderDate,
-                    orderTotal: order.orderTotal,
-                    orderStatus: order.orderStatus as OrderStatus,
-                    paymentStatus: order.paymentStatus as PaymentStatus,
-                    lastUpdated: order.lastUpdated,
-                    shippingId: order.shippingId ?? undefined,
-                    items: order.orderItems.map(item => ({
-                        orderItemId: item.id,
-                        orderId: item.orderId,
-                        productId: item.productId,
-                        quantity: item.quantity,
-                        unitPrice: item.unitPrice,
-                        subtotal: item.subtotal,
-                        createdAt: item.createdAt,
-                        updatedAt: item.updatedAt
-                    }))
-                })),
+                orders: orders.map(order => this.orderResponse(order)),
                 total
-            };
+            }
             
         } catch (error: any) {
-
-            throw new Error(`Error getting orders: ${error.message}`);
+            throw new Error(`Error getting all orders: ${error.message}`);
             
+        }
+    }
+
+    // get order by order id
+    static async getOrderById(orderId: string): Promise<Order | null> {
+        try {
+
+            // find the order
+            const order = await prisma.order.findUnique({
+                where: { id: orderId },
+                include: { 
+                    orderItems: true 
+                }
+            });
+
+            // check if the order is not found
+            if (!order){
+                return null;
+            } 
+
+            // return the order
+            return this.orderResponse(order);
+
+        } catch (error: any) {
+            throw new Error(`Error getting order: ${error.message}`);
+
         }
     }
 
     // update order status
-    static async updateOrderStatus(orderId: string, orderStatus: OrderStatus, paymentStatus?: PaymentStatus): Promise<Order>{
+    static async updateOrderStatus(orderId: string, orderStatus: OrderStatus, paymentStatus?: PaymentStatus): Promise<Order> {
         try {
+
+            // update order status
             const order = await prisma.order.update({
                 where: { id: orderId },
                 data: {
@@ -224,122 +311,28 @@ export class OrderModel {
                     paymentStatus,
                     lastUpdated: new Date()
                 },
-                include: {
-                    orderItems: true
+                include: { 
+                    orderItems: true 
                 }
             });
 
-            return {
-                orderId: order.id,
-                userId: order.userId,
-                orderDate: order.orderDate,
-                orderTotal: order.orderTotal,
-                orderStatus: order.orderStatus as OrderStatus,
-                paymentStatus: order.paymentStatus as PaymentStatus,
-                lastUpdated: order.lastUpdated,
-                shippingId: order.shippingId ?? undefined,
-                items: order.orderItems.map(item => ({
-                    orderItemId: item.id,
-                    orderId: item.orderId,
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    unitPrice: item.unitPrice,
-                    subtotal: item.subtotal,
-                    createdAt: item.createdAt,
-                    updatedAt: item.updatedAt
-                }))
-            };
-        } catch (error: any) {
+            // return the updated order
+            return this.orderResponse(order);
 
+        } catch (error: any) {
             throw new Error(`Error updating order status: ${error.message}`);
-            
-        }
-    }
 
-    // cancel order and restore stock
-    static async cancelOrder(orderId: string): Promise<Order> {
-        try {
-            return await prisma.$transaction(async (tx) => {
-                // get order and order items
-                const order = await tx.order.findUnique({
-                    where: {
-                        id: orderId,
-                        orderStatus: {
-                            notIn: [OrderStatus.DELIVERED, 
-                                    OrderStatus.CANCELLED,
-                                    OrderStatus.REFUNDED]
-                        }
-                    },
-                    include: {
-                        orderItems: true
-                    }
-                });
-
-                if (!order) {
-                    throw new Error('Order not found or cannot be cancelled');
-                }
-
-                // restore stock quantities
-                for (const item of order.orderItems) {
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: {
-                            stockQuantity: {
-                                increment: item.quantity
-                            }
-                        }
-                    });
-                }
-
-                // update order status
-                const updatedOrder = await tx.order.update({
-                    where: { id: orderId },
-                    data: {
-                        orderStatus: OrderStatus.CANCELLED,
-                        paymentStatus: PaymentStatus.CANCELLED,
-                        lastUpdated: new Date()
-                    },
-                    include: {
-                        orderItems: true
-                    }
-
-                });
-
-                return {
-                    orderId: updatedOrder.id,
-                    userId: updatedOrder.userId,
-                    orderDate: updatedOrder.orderDate,
-                    orderTotal: updatedOrder.orderTotal,
-                    orderStatus: updatedOrder.orderStatus as OrderStatus,
-                    paymentStatus: updatedOrder.paymentStatus as PaymentStatus,
-                    lastUpdated: updatedOrder.lastUpdated,
-                    shippingId: updatedOrder.shippingId ?? undefined,
-                    items: updatedOrder.orderItems.map(item => ({
-                        orderItemId: item.id,
-                        orderId: item.orderId,
-                        productId: item.productId,
-                        quantity: item.quantity,
-                        unitPrice: item.unitPrice,
-                        subtotal: item.subtotal,
-                        createdAt: item.createdAt,
-                        updatedAt: item.updatedAt
-                    }))
-                };
-
-            });
-            
-        } catch (error: any) {
-
-            throw new Error(`Error cancelling order: ${error.message}`);
-            
         }
     }
 
     // get order summary
     static async getOrderSummary(userId?: string, startDate?: Date, endDate?: Date): Promise<OrderSummary> {
         try {
+
+            // initialise where clause
             const where: Prisma.OrderWhereInput = {};
 
+            // build where clause
             if (userId) {
                 where.userId = userId;
             }
@@ -351,41 +344,25 @@ export class OrderModel {
                 };
             }
 
-            const [orderCount, totalAmount, statusCounts ] = await Promise.all([
-
-                // get total order count
+            // get order summary
+            const [orderCount, totalAmount, statusCounts] = await Promise.all([
                 prisma.order.count({ where }),
-
-                // get total revenue
                 prisma.order.aggregate({
                     where,
-                    _sum: {
-                        orderTotal: true
-                    }
+                    _sum: { orderTotal: true }
                 }),
-
-                // get counts by status
                 prisma.order.groupBy({
                     by: ['orderStatus'],
                     where,
                     _count: true
-
                 })
             ]);
 
+            // calculate total revenue, average order value and orders by status
             const totalRevenue = totalAmount._sum.orderTotal || new Prisma.Decimal(0);
             const averageOrderValue = orderCount > 0 ? totalRevenue.div(orderCount) : new Prisma.Decimal(0);
 
-            // initialize status counts
-            const ordersByStatus = Object.values(OrderStatus).reduce((acc, status) => {
-                acc[status] = 0;
-                return acc;
-            }, {} as Record<OrderStatus, number>);
-
-            // fill in actual counts
-            statusCounts.forEach(({ orderStatus, _count }) => {
-                ordersByStatus[orderStatus as OrderStatus] = _count;
-            });
+            const ordersByStatus = this.initializeOrderStatusCounts(statusCounts);
 
             return {
                 totalOrders: orderCount,
@@ -393,51 +370,9 @@ export class OrderModel {
                 averageOrderValue,
                 ordersByStatus
             };
-            
         } catch (error: any) {
-
             throw new Error(`Error getting order summary: ${error.message}`);
-            
         }
     }
 
-    // get user order history
-    static async getUserOrderHistory(userId: string, limit: number = 10, cursor?: string): Promise<Order[]> {
-        try {
-            const orders = await prisma.order.findMany({
-                where: { userId },
-                take: limit,
-                skip: cursor ? 1 : 0,
-                orderBy: {orderDate: 'desc'},
-                include: { orderItems: true }
-
-            })
-
-            return orders.map(order => ({
-                orderId: order.id,
-                userId: order.userId,
-                orderDate: order.orderDate,
-                orderTotal: order.orderTotal,
-                orderStatus: order.orderStatus as OrderStatus,
-                paymentStatus: order.paymentStatus as PaymentStatus,
-                lastUpdated: order.lastUpdated,
-                shippingId: order.shippingId ?? undefined,
-                items: order.orderItems.map(item => ({
-                    orderItemId: item.id,
-                    orderId: item.orderId,
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    unitPrice: item.unitPrice,
-                    subtotal: item.subtotal,
-                    createdAt: item.createdAt,
-                    updatedAt: item.updatedAt
-                }))
-            }));
-            
-        } catch (error: any) {
-
-            throw new Error(`Error getting user order history: ${error.message}`);
-            
-        }
-    }
 }

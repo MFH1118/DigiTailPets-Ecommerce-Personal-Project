@@ -76,7 +76,7 @@ export class OrderController {
             const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
             const cursor = req.query.cursor as string | undefined;
 
-            const orders = await OrderModel.getUserOrderHistory(userId, limit, cursor);
+            const orders = await OrderModel.getCustomerOrderHistory(userId, limit, cursor);
 
             return res.status(200).json({ 
                 orders,
@@ -127,7 +127,7 @@ export class OrderController {
                 return res.status(400).json(errorResponse);
             }
 
-            const cancelledOrder = await OrderModel.cancelOrder(orderId);
+            const cancelledOrder = await OrderModel.cancelCustomerOrder(orderId, userId);
 
             return res.status(200).json({
                 message: 'Order cancelled successfully',

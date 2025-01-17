@@ -24,7 +24,7 @@ export class AdminOrderController {
                 limit
             } = req.query;
 
-            const result = await OrderModel.getOrders({
+            const result = await OrderModel.getAllOrders({
                 userId: userId as string,
                 orderStatus: orderStatus as OrderStatus,
                 paymentStatus: paymentStatus as PaymentStatus,
@@ -98,27 +98,7 @@ export class AdminOrderController {
             return res.status(500).json(errorResponse);
         }
     }
-
-    // cancel order
-    static async cancelOrder(req: Request, res: Response): Promise<Response> {
-        try {
-            const orderId = req.params.orderId;
-            const cancelledOrder = await OrderModel.cancelOrder(orderId);
-
-            return res.status(200).json({
-                message: 'Order cancelled successfully',
-                order: cancelledOrder
-            });
-            
-        } catch (error: any) {
-            const errorResponse: ErrorResponse = {
-                error: 'Error cancelling order',
-                details: process.env.NODE_ENV === 'development' ? error.message : undefined
-            };
-            return res.status(500).json(errorResponse);
-        }
-    }
-
+    
     // get order summary
     static async getOrderSummary(req: Request, res: Response): Promise<Response> {
         try {
@@ -140,6 +120,5 @@ export class AdminOrderController {
             return res.status(500).json(errorResponse);
         }
     }
-
 
 }
