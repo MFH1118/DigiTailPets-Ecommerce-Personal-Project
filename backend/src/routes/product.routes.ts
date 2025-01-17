@@ -8,14 +8,10 @@ const router: Router = express.Router();
 // require authentication for all routes
 router.use(authenticateUser);
 
-
-
 // get all products
 router.get('/', ProductController.getProducts);
 
 // get single product
 router.get('/:productId', ProductController.getProductById);
-
-
 
 export default router;

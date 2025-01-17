@@ -12,7 +12,7 @@ export class OrderController {
     static async createCustomerOrder(req: Request, res: Response) {
         try {
             const userId = req.user?.userId as string;
-            const orderData: CreateOrderRequest = { userId, items: req.body.items, shippingId: req.body.shippingId };
+            const orderData: CreateOrderRequest = { userId, items: req.body.items, shippingId: req.body.shippingId || undefined };
 
             const newOrder = await OrderModel.createOrder(orderData);
 
@@ -26,6 +26,8 @@ export class OrderController {
                 error: 'Error creating order',
                 details: process.env.NODE_ENV === 'development' ? error.message : undefined
             }
+
+            return res.status(500).json(errorResponse);
             
         }
     }

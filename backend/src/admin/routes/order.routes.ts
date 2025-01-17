@@ -24,7 +24,4 @@ router.get('/:orderId', AdminOrderController.getOrderById);
 // update order status
 router.patch('/:orderId/status', validateOrderStatusUpdate, AdminOrderController.updateOrderStatus);
 
-// cancel order
-router.post('/:orderId/cancel', AdminOrderController.cancelOrder);
-
 export default router;
