@@ -7,7 +7,7 @@ export interface Session {
     user_id: string;
     session_token: string;
     session_expiry: Date;
-    session_type: 'web' | 'mobile' | 'api';
+    session_type: SessionType;
     session_creation_time: Date;
     session_last_accessed: Date;
 }
