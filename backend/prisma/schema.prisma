@@ -1,4 +1,5 @@
 // prisma/schema.prisma
+
 datasource db {
   provider  = "postgresql"
   url  	    = env("DATABASE_URL")
@@ -27,12 +28,16 @@ model User {
   authentication  Authentication?
   sessions        Session[]      
   addresses       Address[]
-  cart            Cart?
+  carts           Cart?
   wishList        WishList?
   orders          Order[]
   payments        PaymentDetails[]
+  auditlogs       AuditLog[]
 
   @@map("users")
+  @@index([email])
+  @@index([username])
+  @@index([isActive])
 }
 
 model Address {
@@ -49,9 +54,11 @@ model Address {
   // Relations
   user        User     @relation(fields: [userId], references: [id])
   userId      String   @map("user_id")
+  order       Order[]
 
   @@map("addresses")
   @@index([userId, addressType])
+  @@index([isDefault])
 }
 
 model Role {
@@ -75,6 +82,7 @@ model Authentication {
   userId          String    @unique @map("user_id")
 
   @@map("authentications")
+  @@index([loginAttempts, lockoutEndTime])
 }
 
 model Session {
@@ -90,6 +98,8 @@ model Session {
   user              User      @relation(fields: [userId], references: [id])
 
   @@map("sessions")
+  @@index([token])
+  @@index([expiry])
   @@index([userId, expiry])
 }
 
@@ -115,8 +125,10 @@ model Product {
   @@map("products")
   @@index([categoryId])
   @@index([sku])
-  @@index([isActive])
+  @@index([isActive, categoryId])
+  @@index([name])
   @@index([price])
+  @@index([stockQuantity])
 }
 
 model Category {
@@ -202,11 +214,14 @@ model Order {
   lastUpdated     DateTime       @updatedAt @map("last_updated")
 
   // Relations
-  user            User           @relation(fields: [userId], references: [id])
-  userId          String         @map("user_id")
-  payment         PaymentDetails?
-  shipment        Shipments?     @relation(fields: [shippingId], references: [id])
-  shippingId      String?        @unique @map("shipping_id")
+  user            User            @relation(fields: [userId], references: [id])
+  userId          String          @map("user_id")
+  address         Address?        @relation(fields: [addressId], references: [id])
+  addressId       String?         @map("address_id")
+  payment         PaymentDetails? @relation(fields: [paymentId], references: [id])
+  paymentId       String?         @map("payment_id")
+  shipment        Shipments?      @relation(fields: [shippingId], references: [id])
+  shippingId      String?         @unique @map("shipping_id")
   orderItems      OrderItem[]
 
   @@map("orders")
@@ -214,6 +229,8 @@ model Order {
   @@index([orderStatus])
   @@index([orderDate])
   @@index([paymentStatus])
+  @@index([userId, orderStatus])
+  @@index([userId, orderDate])
 }
 
 model OrderItem {
@@ -237,26 +254,26 @@ model OrderItem {
 
 model PaymentDetails {
   id                    String         @id @default(uuid()) @map("payment_id")
-  userId                String         @map("user_id")
   amount                Decimal        @map("payment_amount") @db.Decimal(10, 2)
   currency              String         @map("payment_currency")
   method                String         @map("payment_method")
   provider              String         @map("payment_provider")
   status                PaymentStatus  @default(PENDING) @map("payment_status")
-  transactionDate      DateTime        @default(now()) @map("payment_transaction_date")
-  authorizationCode    String?         @map("payment_authorization_code")
-  lastFourDigits       String?         @map("payment_four_digit_num")
-  expirationDate       DateTime?       @map("payment_expiration_date")
+  transactionDate       DateTime       @default(now()) @map("payment_transaction_date")
+  authorizationCode     String?        @map("payment_authorization_code")
+  lastFourDigits        String?        @map("payment_four_digit_num")
+  expirationDate        DateTime?      @map("payment_expiration_date")
   
   // Relations
-  user                 User            @relation(fields: [userId], references: [id])
-  order                Order?          @relation(fields: [orderId], references: [id])
-  orderId              String?         @unique @map("order_id")
+  user                  User           @relation(fields: [userId], references: [id])
+  userId                String         @map("user_id")
+  order                 Order[]
 
   @@map("payment_details")
   @@index([userId])
   @@index([status])
   @@index([transactionDate])
+  @@index([userId, status])
 }
 
 model Shipments {
@@ -274,6 +291,24 @@ model Shipments {
   @@map("shipments")
   @@index([status])
   @@index([shipmentDate])
+}
+
+model AuditLog {
+  id          String    @id @default(uuid()) @map("auditlog_id")
+  action      String    @map("auditlog_action")
+  timestamp   DateTime  @default(now()) @map("auditlog_timestamp")
+  ipAddress   String    @map("auditlog_ip_address")
+  details     String?   @map("auditlog_details")
+
+  // Relations
+  user       User       @relation(fields: [userId], references: [id])
+  userId      String    @map("user_id")
+
+  @@map("audit_logs")
+  @@index([userId])
+  @@index([timestamp])
+  @@index([action])
+  @@index([userId, timestamp])
 }
 
 enum OrderStatus {
