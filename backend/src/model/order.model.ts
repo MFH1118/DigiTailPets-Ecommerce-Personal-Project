@@ -232,10 +232,15 @@ export class OrderModel {
             }
 
             if(options.startDate || options.endDate) {
-                where.orderDate = {
-                    gte: options.startDate,
-                    lte: options.endDate
-                };
+                where.orderDate = {};
+
+                if (options.startDate){
+                    where.orderDate.gte = new Date(new Date(options.startDate).setHours(0, 0, 0, 0));
+                }
+
+                if (options.endDate) {
+                    where.orderDate.lte = new Date(new Date(options.endDate).setHours(23, 59, 59, 999));
+                }
             }
 
             if (options.minTotal || options.maxTotal) {
@@ -338,10 +343,15 @@ export class OrderModel {
             }
 
             if (startDate || endDate) {
-                where.orderDate = {
-                    gte: startDate,
-                    lte: endDate
-                };
+                where.orderDate = {}
+
+                if (startDate){
+                    where.orderDate.gte = new Date(new Date(startDate).setHours(0, 0, 0, 0));
+                } 
+
+                if (endDate){
+                    where.orderDate.lte = new Date(new Date(endDate).setHours(23, 59, 59, 999));
+                }
             }
 
             // get order summary
@@ -360,7 +370,9 @@ export class OrderModel {
 
             // calculate total revenue, average order value and orders by status
             const totalRevenue = totalAmount._sum.orderTotal || new Prisma.Decimal(0);
-            const averageOrderValue = orderCount > 0 ? totalRevenue.div(orderCount) : new Prisma.Decimal(0);
+            let averageOrderValue = orderCount > 0 ? totalRevenue.div(orderCount) : new Prisma.Decimal(0);
+            averageOrderValue = new Prisma.Decimal(averageOrderValue.toFixed(2));
+
 
             const ordersByStatus = this.initializeOrderStatusCounts(statusCounts);
 

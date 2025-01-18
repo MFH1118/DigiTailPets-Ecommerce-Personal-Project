@@ -79,6 +79,22 @@ export class AdminOrderController {
             const orderId = req.params.orderId;
             const { orderStatus, paymentStatus } = req.body;
 
+            // check if order provided
+            if (!orderId) {
+                const errorResponse: ErrorResponse = {
+                    error: 'Order ID is required'
+                };
+                return res.status(400).json(errorResponse);
+            }
+
+            // check if fields are valid
+            if (!orderStatus || !paymentStatus) {
+                const errorResponse: ErrorResponse = {
+                    error: 'Order status and payment status are required'
+                };
+                return res.status(400).json(errorResponse);
+            }
+
             const updatedOrder = await OrderModel.updateOrderStatus(
                 orderId,
                 orderStatus,
