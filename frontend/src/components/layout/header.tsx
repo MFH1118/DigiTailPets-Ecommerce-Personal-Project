@@ -1,3 +1,5 @@
+//src/components/layout/header.tsx
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, ShoppingCart, User } from 'lucide-react';
