@@ -69,7 +69,7 @@ interface ProductSectionProps {
 const ProductSection = ({ title, products }: ProductSectionProps) => (
   <section className="mb-8 sm:mb-10 md:mb-12">
     <h2 className="text-2xl font-semibold mb-6">{title}</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:grid-cols-2 sm:gap-6">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
