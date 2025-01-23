@@ -1,35 +1,45 @@
 //src/components/HomeContent.tsx
 
+"use client";
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from 'next/image';
 import { Product, getFeaturedProducts, getNewReleases, getEssentials } from '@/data/products';
+import Link from 'next/link';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => (
-  <Card className="w-[280px] transition-all hover:shadow-lg">
-    <CardContent className="p-3 sm:p-4">
-      <div className="aspect-square relative mb-2 sm:mb-3">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-cover rounded-md"
-        />
-      </div>
-      <h3 className="font-medium text-xs sm:text-sm mb-1 sm:mb-2">{product.name}</h3>
-      <p className="text-sm sm:text-base font-bold">${product.price.toFixed(2)}</p>
-    </CardContent>
-    <CardFooter className="p-3 sm:p-4 pt-0">
-      <Button className="w-full" variant="outline">
-        Add to Cart
-      </Button>
-    </CardFooter>
-  </Card>
+  <Link href={`/product/${product.id}`} passHref>
+    <Card className="w-[280px] transition-all hover:shadow-lg">
+      <CardContent className="p-3 sm:p-4">
+        <div className="aspect-square relative mb-2 sm:mb-3">
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-cover rounded-md"
+          />
+        </div>
+        <h3 className="font-medium text-xs sm:text-sm mb-1 sm:mb-2">{product.name}</h3>
+        <p className="text-sm sm:text-base font-bold">${product.price.toFixed(2)}</p>
+      </CardContent>
+      <CardFooter className="p-3 sm:p-4 pt-0">
+      <Button 
+          className="w-full" 
+          variant="outline"
+          onClick={(e) => {
+            e.preventDefault();
+          }}
+        >
+          Add to Cart
+        </Button>
+      </CardFooter>
+    </Card>
+  </Link>
 );
 
 interface ProductSectionProps {
