@@ -1,8 +1,9 @@
 // src/types/auth.ts
 import { z } from 'zod';
-import { signupSchema } from '@/schemas/auth';
+import { signupSchema, signinSchema} from '@/schemas/auth';
 
 export type SignupFormValues = z.infer<typeof signupSchema>;
+export type SigninFormValues = z.infer<typeof signinSchema>;
 
 export interface AuthLayoutProps {
   children: React.ReactNode;

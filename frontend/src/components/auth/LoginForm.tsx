@@ -1,13 +1,14 @@
-// src/components/auth/SignupForm.tsx
+// src/components/auth/LoginForm.tsx
 "use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { SigninFormValues } from "@/types/auth";
+import { signinSchema } from "@/schemas/auth";
+import AuthLayout from "@/components/auth/AuthLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -15,43 +16,36 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { signupSchema } from "@/schemas/auth";
-import { SignupFormValues } from "@/types/auth";
-import AuthLayout from "@/components/auth/AuthLayout";
+import { Input } from "@/components/ui/input";
+import { Eye, EyeOff } from "lucide-react";
 
-const SignupForm = () => {
+const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
-  const form = useForm<SignupFormValues>({
-    resolver: zodResolver(signupSchema),
+  const form = useForm<SigninFormValues>({
+    resolver: zodResolver(signinSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      mobileNumber: "",
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = async (values: SignupFormValues) => {
+  const onSubmit = async (values: SigninFormValues) => {
     console.log(values);
-    // Handle form submission
   };
 
-  const handleGoogleSignup = () => {
-    // Handle Google OAuth
-  };
+  const handleGoogleSignin = () => {};
 
   return (
     <AuthLayout
-      title="Create a DigiTail Pet Account"
-      subtitle="Join DigiTailPets! Your Pet's Needs, Just a Click Away!"
+      title="Welcome Back!"
+      subtitle="Sign in to your account to continue"
     >
       <div className="space-y-4">
         <Button
           variant="outline"
           className="w-full bg-white flex items-center justify-center gap-2"
-          onClick={handleGoogleSignup}
+          onClick={handleGoogleSignin}
         >
           <img src="/google-icon.svg" alt="Google" className="h-5 w-5" />
           Continue with Google
@@ -70,54 +64,14 @@ const SignupForm = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="First Name*" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Last Name*" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="mobileNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Mobile Number*" type="tel" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
-                      placeholder="Email Address*"
-                      type="email"
-                      autoComplete="username"
-                      {...field}
+                    <Input 
+                        placeholder="Email Address*" 
+                        autoComplete="username" 
+                        {...field} 
                     />
                   </FormControl>
                   <FormMessage />
@@ -158,24 +112,35 @@ const SignupForm = () => {
               )}
             />
 
+            <div className="text-left text-sm">
+              <Link
+                href="/forgot-password"
+                className="text-blue-600 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
             <Button
               type="submit"
               className="w-full bg-gray-900 text-white hover:bg-gray-800"
             >
-              Continue
+              Sign In
             </Button>
+
+
           </form>
         </Form>
 
         <div className="text-center text-sm">
           <p className="text-gray-600">
-            Already have an account?{" "}
-            <Link href="/signin" className="text-blue-600 hover:underline">
-              Sign in here
+            Dont have an account?{" "}
+            <Link href="/signup" className="text-blue-600 hover:underline">
+              Sign up here
             </Link>
           </p>
           <p className="text-gray-600 mt-2 text-xs">
-            By creating an account, you agree to DigiTail Pet's{" "}
+            By signing in, you agree to our current{" "}
             <Link href="/terms" className="text-blue-600 hover:underline">
               Terms & Conditions
             </Link>{" "}
@@ -183,7 +148,7 @@ const SignupForm = () => {
             <Link href="/privacy" className="text-blue-600 hover:underline">
               Privacy Policy
             </Link>{" "}
-            This includes how we collect, use, and protect your personal data.
+            on how we manage your account and your personal data.
           </p>
         </div>
       </div>
@@ -191,4 +156,4 @@ const SignupForm = () => {
   );
 };
 
-export default SignupForm;
+export default LoginForm;
