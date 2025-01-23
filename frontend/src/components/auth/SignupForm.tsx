@@ -5,9 +5,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { Eye, EyeOff } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Eye, EyeOff } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -50,13 +50,13 @@ const SignupForm = () => {
       <div className="space-y-4">
         <Button 
           variant="outline" 
-          className="w-full bg-white"
+          className="w-full bg-white flex items-center justify-center gap-2"
           onClick={handleGoogleSignup}
         >
           <img 
             src="/google-icon.svg" 
             alt="Google" 
-            className="w-5 h-5 mr-2"
+            className="h-5 w-5"
           />
           Continue with Google
         </Button>
@@ -117,7 +117,7 @@ const SignupForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input placeholder="Email Address*" type="email" {...field} />
+                    <Input placeholder="Email Address*" type="email" autoComplete="username" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -134,8 +134,18 @@ const SignupForm = () => {
                       <Input
                         placeholder="Password*"
                         type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
                         {...field}
                       />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
                     </div>
                   </FormControl>
                   <FormMessage />

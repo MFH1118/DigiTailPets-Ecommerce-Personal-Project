@@ -1,4 +1,6 @@
 // src/components/auth/AuthLayout.tsx
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuthLayoutProps } from '@/types/auth';
 
