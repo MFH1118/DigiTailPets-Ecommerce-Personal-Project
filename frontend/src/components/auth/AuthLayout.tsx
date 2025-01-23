@@ -6,7 +6,7 @@ import { AuthLayoutProps } from '@/types/auth';
 
 const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50 p-4">
+    <div className="flex justify-center items-center min-h-screen p-4">
       <Card className="w-full max-w-md bg-gray-100">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-2xl font-bold">{title}</CardTitle>
