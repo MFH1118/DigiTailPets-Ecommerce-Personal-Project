@@ -21,7 +21,7 @@ export interface Product {
       description: "High-quality dry dog food for all breeds",
       category: "Dog Food",
       stock: 100,
-      rating: 4.5,
+      rating: 3.5,
       brand: "PawPerfect"
     },
     {
@@ -75,7 +75,7 @@ export interface Product {
     return petProducts.map(product => ({
       ...product,
       id: `${section}-${product.id}`,
-      price: section === 'featured' ? product.price * 1.1 : product.price
+      price: product.price
     }));
   };
   
