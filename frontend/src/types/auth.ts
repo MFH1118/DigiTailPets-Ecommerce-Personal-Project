@@ -1,4 +1,5 @@
 // src/types/auth.ts
+
 import { z } from 'zod';
 import { signupSchema, signinSchema} from '@/schemas/auth';
 

@@ -1,3 +1,5 @@
+// src/app/product/[id]/page.tsx
+
 import ProductDetail from "@/components/ProductDetail";
 import { getProducts } from "@/data/products";
 
