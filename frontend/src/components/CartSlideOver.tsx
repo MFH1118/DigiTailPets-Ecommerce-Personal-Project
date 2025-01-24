@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from 'next/image';
 import type { Product } from '@/data/products';
+import Link from 'next/link';
 
 interface CartItem extends Product {
   quantity: number;
@@ -49,13 +50,17 @@ const CartSlideover = ({
               {items.map((item) => (
                 <div key={item.id} className="flex items-center py-4 gap-4">
                   <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={96}
-                      height={96}
-                      className="h-full w-full object-cover"
-                    />
+                    <SheetClose asChild>
+                      <Link href={`/product/${item.id}`}>
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          width={96}
+                          height={96}
+                          className="h-full w-full object-cover"
+                        />
+                      </Link>
+                    </SheetClose>
                   </div>
 
                   <div className="flex flex-1 flex-col">

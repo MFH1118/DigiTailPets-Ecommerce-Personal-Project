@@ -17,7 +17,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { addItem } = useCart();
 
   return (
-      <Link href={`/product/${product.id}`} passHref>
+    <Link href={`/product/${product.id}`} passHref>
       <Card className="w-[280px] transition-all hover:shadow-lg">
         <CardContent className="p-3 sm:p-4">
           <div className="aspect-square relative mb-2 sm:mb-3">
