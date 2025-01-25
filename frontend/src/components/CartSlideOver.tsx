@@ -125,9 +125,11 @@ const CartSlideover = ({
               Tax included and shipping calculated at checkout
             </p>
             <SheetClose asChild>
-              <Button className="w-full mt-6" size="lg">
-                CHECKOUT
-              </Button>
+              <Link href="/checkout" passHref>
+                <Button className="w-full mt-6" size="lg">
+                  CHECKOUT
+                </Button>
+              </Link>
             </SheetClose>
           </div>
         </div>
