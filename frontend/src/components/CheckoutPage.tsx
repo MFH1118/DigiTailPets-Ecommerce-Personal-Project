@@ -377,15 +377,10 @@ const CheckoutPage = () => {
                   {isProcessing ? 'Processing...' : 'Place Order'}
                 </Button>
                 {/* Go Back Cart Button */}
-<<<<<<< HEAD
                 <Link href="/cart" className="block mt-4">
                   <Button variant="link" className='w-full text text-center text-sm text-gray-600 hover:text-gray-900'>
                     Return to Cart
                   </Button>
-=======
-                <Link href="/cart" className="block mt-4 text-center text-sm text-gray-600 hover:text-gray-900">
-                  <Button variant="ghost" className='w-full text'>Return to Cart</Button>
->>>>>>> 2a08be5632bd427f40f75af5d3bba38ebf8f2481
                 </Link>
               </div>
             </CardContent>
