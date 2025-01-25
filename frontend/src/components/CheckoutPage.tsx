@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import CheckoutBreadcrumb from '@/components/CheckoutBreadcrumb';
+import Link from 'next/link';
 
 const CheckoutPage = () => {
   const {
@@ -304,14 +305,6 @@ const CheckoutPage = () => {
                   </div>
                 </div>
               </div>
-
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isProcessing}
-              >
-                {isProcessing ? 'Processing...' : 'Pay Now'}
-              </Button>
             </form>
           </Form>
         </div>
@@ -376,6 +369,20 @@ const CheckoutPage = () => {
                   <p>${total.toFixed(2)}</p>
                 </div>
               </div>
+
+              {/*Payment Button*/}
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isProcessing}
+              >
+                {isProcessing ? 'Processing...' : 'Place Order'}
+              </Button>
+
+              {/* Go Back Cart Button */}
+              <Link href="/cart" className="block mt-4 text-center text-sm text-gray-600 hover:text-gray-900" >
+                <Button variant="ghost">Return to Cart</Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

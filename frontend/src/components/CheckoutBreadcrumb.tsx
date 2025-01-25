@@ -1,6 +1,4 @@
 // src/components/CheckoutBreadcrumb.tsx
-import Link from 'next/link';
-
 type Step = 'cart' | 'checkout' | 'order';
 
 interface CheckoutBreadcrumbProps {
@@ -32,14 +30,13 @@ const CheckoutBreadcrumb = ({ currentStep }: CheckoutBreadcrumbProps) => {
                 >
                   {index + 1}
                 </div>
-                <Link 
-                  href={`/${step.key}`}
+                <span 
                   className={`ml-2 ${
                     isActive || isPast ? 'font-medium' : 'opacity-50'
                   }`}
                 >
                   {step.label}
-                </Link>
+                </span>
               </div>
             </div>
           );
