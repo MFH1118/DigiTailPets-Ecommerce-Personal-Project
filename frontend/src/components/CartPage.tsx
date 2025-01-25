@@ -153,8 +153,13 @@ const CartPage = () => {
                       Proceed to checkout
                     </Button>
                   </Link>
+<<<<<<< HEAD
+                  <Link href="/" className="block mt-4">
+                    <Button variant="link" className="w-full text-center text-sm text-gray-600 hover:text-gray-900">
+=======
                   <Link href="/" className="block mt-4 text-center text-sm text-gray-600 hover:text-gray-900">
                     <Button variant="ghost" className="w-full">
+>>>>>>> 2a08be5632bd427f40f75af5d3bba38ebf8f2481
                       Continue shopping
                     </Button>
                   </Link>

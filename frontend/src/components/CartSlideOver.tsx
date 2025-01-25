@@ -132,10 +132,12 @@ const CartSlideover = ({
               </Link>
             </SheetClose>
             <SheetClose asChild>
-                <Link href="/cart" className="block mt-4 text-center text-sm text-gray-600 hover:text-gray-900">
+              <Link href="/cart" className="block mt-4">
+                <Button variant="link" className=" w-full text-center text-sm text-gray-600 hover:text-gray-900">
                   View Cart
-                </Link>
-              </SheetClose>
+                </Button>
+              </Link>
+            </SheetClose>
           </div>
         </div>
       </SheetContent>
