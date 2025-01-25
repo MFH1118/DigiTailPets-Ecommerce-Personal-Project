@@ -32,6 +32,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import CheckoutBreadcrumb from '@/components/CheckoutBreadcrumb';
 
 const CheckoutPage = () => {
   const {
@@ -71,19 +72,11 @@ const CheckoutPage = () => {
 
   return (
     <div className="max-w-[1440px] mx-auto px-4 py-8">
+      <CheckoutBreadcrumb currentStep="checkout" />
+      {/* Checkout Form */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column - Form */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="flex justify-center">
-            <Image
-              src="/digitails-logo.svg"
-              alt="DigiTailPets"
-              width={200}
-              height={50}
-              className="h-auto"
-            />
-          </div>
-
           {/* Express Checkout Options */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">Express checkout</h2>
