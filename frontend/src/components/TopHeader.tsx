@@ -17,7 +17,7 @@ const TopHeader = () => {
 
   return (
     <div className="border-b bg-background">
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 mx-auto max-w-[1220px]">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">

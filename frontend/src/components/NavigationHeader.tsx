@@ -14,7 +14,7 @@ const navigationLinks = [
 const NavigationHeader = () => {
   return (
     <div className="border-b bg-background hidden md:block">
-      <div className="px-4">
+      <div className="px-4 mx-auto max-w-[1220px]">
         <nav className="flex justify-center">
           {navigationLinks.map((link, index) => (
             <Link
