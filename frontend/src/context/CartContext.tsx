@@ -1,7 +1,7 @@
 // src/context/CartContext.tsx
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import type { Product } from '@/data/products';
 
 interface CartItem extends Product {
@@ -17,6 +17,8 @@ interface CartContextType {
   updateQuantity: (productId: string, quantity: number) => void;
   removeItem: (productId: string) => void;
   clearCart: () => void;
+  getItems: () => CartItem[];
+  subtotal: number;
   itemCount: number;
 }
 
@@ -66,7 +68,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems([]);
   }, []);
 
+  const getItems = useCallback(() => {
+    return items;
+  }, [items]);
+
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+
+  const subtotal = useMemo(() => {
+    return items.reduce((total, item) => total + item.price * item.quantity, 0);
+  }, [items]);
 
   const value = {
     items,
@@ -77,7 +87,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     updateQuantity,
     removeItem,
     clearCart,
+    getItems,
     itemCount,
+    subtotal
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

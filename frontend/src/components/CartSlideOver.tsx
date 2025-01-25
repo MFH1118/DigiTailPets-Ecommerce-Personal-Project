@@ -1,5 +1,7 @@
+// src/components/CartSlideOver.tsx
+
 import React from 'react';
-import { X, Minus, Plus } from 'lucide-react';
+import { Minus, Plus } from 'lucide-react';
 import { 
   Sheet,
   SheetContent,
@@ -11,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import Image from 'next/image';
 import type { Product } from '@/data/products';
 import Link from 'next/link';
+import { useCart } from '@/context/CartContext';
 
 interface CartItem extends Product {
   quantity: number;
@@ -31,7 +34,8 @@ const CartSlideover = ({
   onUpdateQuantity,
   onRemoveItem 
 }: CartSlideoverProps) => {
-  const subtotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+  
+  const { subtotal } = useCart();
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
