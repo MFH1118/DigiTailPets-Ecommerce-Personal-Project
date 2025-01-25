@@ -1,10 +1,10 @@
-//src/components/layout/NavigationHeader.tsx
+// src/components/layout/NavigationHeader.tsx
 "use client";
 
 import Link from 'next/link';
 import { cn } from "@/lib/utils";
 
-const navigationLinks = [
+export const navigationLinks = [
   { name: 'Offers', href: '/offers' },
   { name: 'Shop By Pets', href: '/shop-by-pets' },
   { name: 'Shop By Brand', href: '/shop-by-brand' },
@@ -16,7 +16,7 @@ const NavigationHeader = () => {
     <div className="border-b bg-background hidden md:block">
       <div className="px-4 mx-auto max-w-[1220px]">
         <nav className="flex justify-center">
-          {navigationLinks.map((link, index) => (
+          {navigationLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}

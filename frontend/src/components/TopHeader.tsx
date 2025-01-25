@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useCart } from '@/context/CartContext';
 import CartSlideOver from '@/components/CartSlideOver';
 import { useState } from 'react';
+import { navigationLinks } from '@/components/NavigationHeader';
 
 const TopHeader = () => {
   const { isOpen, closeCart, openCart, items, itemCount, updateQuantity, removeItem } = useCart();
@@ -80,7 +81,7 @@ const TopHeader = () => {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right">
+              <SheetContent side="right" className="w-[300px]">
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
@@ -89,6 +90,15 @@ const TopHeader = () => {
                     <User className="mr-2 h-5 w-5" />
                     Account
                   </Button>
+                  {navigationLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className="px-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
                 </div>
               </SheetContent>
             </Sheet>
