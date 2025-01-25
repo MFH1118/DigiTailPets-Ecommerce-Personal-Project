@@ -9,6 +9,12 @@ import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 import Link from 'next/link';
 import CheckoutBreadcrumb from '@/components/CheckoutBreadcrumb';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const CartPage = () => {
   const { items, updateQuantity, removeItem, subtotal } = useCart();
@@ -119,28 +125,43 @@ const CartPage = () => {
 
         {/* Cart Totals */}
         <div className="lg:col-span-1">
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Cart totals</h2>
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+          <Card className="bg-gray-50">
+            <CardHeader>
+              <CardTitle>
+                Cart Totals
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <p className="text-sm font-medium">
+                      ${subtotal.toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="flex justify-between pb-4 border-b">
+                    <span>Shipping</span>
+                    <span>Calculate shipping</span>
+                  </div>
+                  <div className="flex justify-between font-semibold text-lg pb-4">
+                    <span>Total</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                  </div>
+                  <Link href="/checkout">
+                    <Button className="w-full">
+                      Proceed to checkout
+                    </Button>
+                  </Link>
+                  <Link href="/" className="block mt-4 text-center text-sm text-gray-600 hover:text-gray-900">
+                    <Button variant="ghost" className="w-full">
+                      Continue shopping
+                    </Button>
+                  </Link>
+                </div>
               </div>
-              <div className="flex justify-between pb-4 border-b">
-                <span>Shipping</span>
-                <span>Calculate shipping</span>
-              </div>
-              <div className="flex justify-between font-semibold text-lg">
-                <span>Total</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-              <Link href="/checkout">
-                <Button className="w-full">
-                  Proceed to checkout
-                </Button>
-              </Link>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

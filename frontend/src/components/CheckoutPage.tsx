@@ -311,7 +311,7 @@ const CheckoutPage = () => {
 
         {/* Right Column - Order Summary */}
         <div className="lg:col-span-1">
-          <Card>
+          <Card className="bg-gray-50">
             <CardHeader>
               <CardTitle>Order Summary</CardTitle>
             </CardHeader>
@@ -368,21 +368,19 @@ const CheckoutPage = () => {
                   <p>Total</p>
                   <p>${total.toFixed(2)}</p>
                 </div>
+                {/*Payment Button*/}
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? 'Processing...' : 'Place Order'}
+                </Button>
+                {/* Go Back Cart Button */}
+                <Link href="/cart" className="block mt-4 text-center text-sm text-gray-600 hover:text-gray-900">
+                  <Button variant="ghost" className='w-full text'>Return to Cart</Button>
+                </Link>
               </div>
-
-              {/*Payment Button*/}
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isProcessing}
-              >
-                {isProcessing ? 'Processing...' : 'Place Order'}
-              </Button>
-
-              {/* Go Back Cart Button */}
-              <Link href="/cart" className="block mt-4 text-center text-sm text-gray-600 hover:text-gray-900" >
-                <Button variant="ghost">Return to Cart</Button>
-              </Link>
             </CardContent>
           </Card>
         </div>
