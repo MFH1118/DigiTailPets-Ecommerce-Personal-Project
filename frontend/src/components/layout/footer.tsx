@@ -30,7 +30,7 @@ const Footer = () => {
 
   return (
     <footer className="w-full bg-gray-50">
-      <div className="mx-auto max-w-[1440px] px-8">
+      <div className="mx-auto max-w-full px-8">
         {/* Newsletter Section */}
         <div className="flex justify-center py-12">
           <div className="flex items-center gap-6">

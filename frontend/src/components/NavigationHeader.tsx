@@ -13,7 +13,7 @@ export const navigationLinks = [
 
 const NavigationHeader = () => {
   return (
-    <div className="border-b bg-background hidden md:block">
+    <div className="border-b bg-background hidden lg:block">
       <div className="px-4 mx-auto max-w-[1220px]">
         <nav className="flex justify-center">
           {navigationLinks.map((link) => (

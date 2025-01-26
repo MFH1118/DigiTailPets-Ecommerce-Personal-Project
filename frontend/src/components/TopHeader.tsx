@@ -33,7 +33,7 @@ const TopHeader = () => {
           </Link>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden md:block flex-1 max-w-xl px-2">
+          <div className="hidden sm:block flex-1 max-w-full px-2">
             <div className="relative">
               <Input
                 type="search"
@@ -49,7 +49,7 @@ const TopHeader = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="sm:hidden"
               onClick={() => setIsSearchVisible(!isSearchVisible)}
             >
               <Search className="h-5 w-5" />
@@ -107,7 +107,7 @@ const TopHeader = () => {
 
         {/* Mobile Search */}
         {isSearchVisible && (
-          <div className="md:hidden pt-4">
+          <div className="sm:hidden pt-4">
             <div className="relative">
               <Input
                 type="search"
