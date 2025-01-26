@@ -176,20 +176,20 @@ const SignupForm = () => {
 
         <div className="text-center text-sm">
           <p className="text-gray-600">
-            Already have an account?{" "}
+            Already have an account?{''}
             <Link href="/signin" className="text-blue-600 hover:underline">
               Sign in here
             </Link>
           </p>
           <p className="text-gray-600 mt-2 text-xs">
-            By creating an account, you agree to DigiTail Pet's{" "}
+            By creating an account, you agree to DigiTail Pet's{''}
             <Link href="/terms" className="text-blue-600 hover:underline">
               Terms & Conditions
-            </Link>{" "}
-            and{" "}
+            </Link>{''}
+            and{''}
             <Link href="/privacy" className="text-blue-600 hover:underline">
               Privacy Policy
-            </Link>{" "}
+            </Link>{''}
             This includes how we collect, use, and protect your personal data.
           </p>
         </div>

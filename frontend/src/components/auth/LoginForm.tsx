@@ -139,20 +139,20 @@ const LoginForm = () => {
 
         <div className="text-center text-sm">
           <p className="text-gray-600">
-            Dont have an account?{" "}
+            Dont have an account?{''}
             <Link href="/signup" className="text-blue-600 hover:underline">
               Sign up here
             </Link>
           </p>
           <p className="text-gray-600 mt-2 text-xs">
-            By signing in, you agree to our current{" "}
+            By signing in, you agree to our current{''}
             <Link href="/terms" className="text-blue-600 hover:underline">
               Terms & Conditions
-            </Link>{" "}
-            and{" "}
+            </Link>{''}
+            and{''}
             <Link href="/privacy" className="text-blue-600 hover:underline">
               Privacy Policy
-            </Link>{" "}
+            </Link>{''}
             on how we manage your account and your personal data.
           </p>
         </div>
