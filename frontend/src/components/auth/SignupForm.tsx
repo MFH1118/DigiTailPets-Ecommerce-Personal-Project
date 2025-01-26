@@ -182,7 +182,7 @@ const SignupForm = () => {
             </Link>
           </p>
           <p className="text-gray-600 mt-2 text-xs">
-            By creating an account, you agree to DigiTail Pet's{''}
+            By creating an account, you agree to DigiTail Pet&apos;{''}
             <Link href="/terms" className="text-blue-600 hover:underline">
               Terms & Conditions
             </Link>{''}
