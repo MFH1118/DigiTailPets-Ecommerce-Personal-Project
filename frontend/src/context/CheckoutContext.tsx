@@ -5,7 +5,6 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 import type {
   PaymentProvider,
   ShippingMethod,
-  DiscountInfo,
   CheckoutState,
   CheckoutStep
 } from '@/types/checkout';
