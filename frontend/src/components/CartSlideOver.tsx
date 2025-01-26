@@ -62,6 +62,8 @@ const CartSlideover = ({
                           width={96}
                           height={96}
                           className="h-full w-full object-cover"
+                          loading="lazy"
+                          sizes="(max-width: 96px) 100vw, 96px"
                         />
                       </Link>
                     </SheetClose>

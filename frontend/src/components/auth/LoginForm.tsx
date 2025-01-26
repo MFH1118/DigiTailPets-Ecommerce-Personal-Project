@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -47,7 +48,13 @@ const LoginForm = () => {
           className="w-full bg-white flex items-center justify-center gap-2"
           onClick={handleGoogleSignin}
         >
-          <img src="/google-icon.svg" alt="Google" className="h-5 w-5" />
+          <Image
+            src="/google-icon.svg"
+            alt="Google"
+            width={20}
+            height={20}
+            className="h-5 w-5"
+          />
           Continue with Google
         </Button>
 
@@ -68,10 +75,10 @@ const LoginForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input 
-                        placeholder="Email Address*" 
-                        autoComplete="username" 
-                        {...field} 
+                    <Input
+                      placeholder="Email Address*"
+                      autoComplete="username"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -127,8 +134,6 @@ const LoginForm = () => {
             >
               Sign In
             </Button>
-
-
           </form>
         </Form>
 

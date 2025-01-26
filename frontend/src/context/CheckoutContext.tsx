@@ -82,7 +82,9 @@ export function CheckoutProvider({ children }: { children: React.ReactNode }) {
       await new Promise(resolve => setTimeout(resolve, 2000));
       // Handle success
     } catch (error) {
-      // Handle error
+      if (error instanceof Error) {
+        console.error('Payment processing failed:', error.message);
+      }
     } finally {
       setState(prev => ({ ...prev, isProcessing: false }));
     }

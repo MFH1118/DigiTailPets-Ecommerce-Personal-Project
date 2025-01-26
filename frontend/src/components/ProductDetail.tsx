@@ -64,7 +64,8 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
               alt={`${product.name} - Image ${currentImage + 1}`}
               fill
               className="object-cover rounded-lg"
-              priority
+              priority={currentImage === 0}
+              loading={currentImage === 0 ? "eager" : "lazy"}
             />
             {product.images.length > 1 && (
               <>
@@ -102,8 +103,11 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
                   <Image
                     src={src}
                     alt={`${product.name} thumbnail ${idx + 1}`}
-                    fill
-                    className="object-cover"
+                    width={80}
+                    height={80}
+                    className="object-cover rounded-md"
+                    loading="lazy"
+                    sizes="80px"
                   />
                 </button>
               ))}

@@ -18,6 +18,7 @@ import {
 import { signupSchema } from "@/schemas/auth";
 import { SignupFormValues } from "@/types/auth";
 import AuthLayout from "@/components/auth/AuthLayout";
+import Image from "next/image";
 
 const SignupForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -53,7 +54,13 @@ const SignupForm = () => {
           className="w-full bg-white flex items-center justify-center gap-2"
           onClick={handleGoogleSignup}
         >
-          <img src="/google-icon.svg" alt="Google" className="h-5 w-5" />
+          <Image
+            src="/google-icon.svg"
+            alt="Google"
+            width={20}
+            height={20}
+            className="h-5 w-5"
+          />
           Continue with Google
         </Button>
 
