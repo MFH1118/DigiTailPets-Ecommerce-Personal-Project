@@ -56,7 +56,7 @@ interface ProductSectionProps {
 const ProductSection = ({ title, products }: ProductSectionProps) => (
   <section className="mb-8 sm:mb-10 md:mb-12">
     <h2 className="text-2xl font-semibold mb-6">{title}</h2>
-    <div className="flex flex-wrap justify-center lg:justify-start xl:max-w-[1440px]:justify-start 2xl:justify-start gap-4 sm:gap-6">
+    <div className="flex flex-wrap justify-center lg:justify-center xl:max-w-[1220px]:justify-center 2xl:justify-center gap-4 sm:gap-6">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}

@@ -1,19 +1,39 @@
 //src/components/layout/TopHeader.tsx
 "use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { Search, ShoppingCart, User, Menu } from 'lucide-react';
+import Image from "next/image";
+import Link from "next/link";
+import { Search, ShoppingCart, User, Menu, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useCart } from '@/context/CartContext';
-import CartSlideOver from '@/components/CartSlideOver';
-import { useState } from 'react';
-import { navigationLinks } from '@/components/NavigationHeader';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useCart } from "@/context/CartContext";
+import CartSlideOver from "@/components/CartSlideOver";
+import { useState } from "react";
+import { navigationLinks } from "@/components/NavigationHeader";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 const TopHeader = () => {
-  const { isOpen, closeCart, openCart, items, itemCount, updateQuantity, removeItem } = useCart();
+  const {
+    isOpen,
+    closeCart,
+    openCart,
+    items,
+    itemCount,
+    updateQuantity,
+    removeItem,
+  } = useCart();
   const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   return (
@@ -25,9 +45,9 @@ const TopHeader = () => {
             <Image
               src="/digitails-logo.svg"
               alt="DigiTailPets Logo"
-              width={150}
-              height={150}
-              className="h-[150px] w-auto"
+              width={100}
+              height={100}
+              className="h-[100px] w-auto"
               priority
             />
           </Link>
@@ -55,8 +75,8 @@ const TopHeader = () => {
               <Search className="h-5 w-5" />
             </Button>
 
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               onClick={openCart}
               className="relative"
@@ -70,9 +90,25 @@ const TopHeader = () => {
             </Button>
 
             <div className="hidden md:block">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-36">
+                  <Link href="/signin">
+                    <DropdownMenuItem className="cursor-pointer">
+                      Sign In
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/signup">
+                    <DropdownMenuItem className="cursor-pointer">
+                      Sign Up
+                    </DropdownMenuItem>
+                  </Link>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <Sheet>
@@ -86,10 +122,20 @@ const TopHeader = () => {
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 mt-8">
-                  <Button variant="ghost" className="w-full justify-start">
-                    <User className="mr-2 h-5 w-5" />
-                    Account
-                  </Button>
+                  <div className="border-b pb-4">
+                    <Link href="/signin">
+                      <Button variant="ghost" className="w-full justify-start">
+                        <User className="mr-2 h-5 w-5" />
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link href="/signup">
+                      <Button variant="ghost" className="w-full justify-start">
+                        <User className="mr-2 h-5 w-5" />
+                        Sign Up
+                      </Button>
+                    </Link>
+                  </div>
                   {navigationLinks.map((link) => (
                     <Link
                       key={link.name}

@@ -21,7 +21,7 @@ const NavigationHeader = () => {
               key={link.name}
               href={link.href}
               className={cn(
-                "px-5 py-4 text-lg font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50",
+                "px-5 py-4 text-sm font-small text-gray-700 hover:text-gray-900 hover:bg-gray-50",
                 "transition-colors duration-200"
               )}
             >
