@@ -10,8 +10,14 @@ const nextConfig = {
         },
       ],
     },
-    trailingSlash: false,
-    skipTrailingSlashRedirect: false,
+    async rewrites() {
+      return [
+        {
+          source: '/favico',
+          destination: '/',
+        },
+      ];
+    },
 }
 
 export default nextConfig;
