@@ -7,33 +7,33 @@ import { hashPassword } from '../src/utils/auth.utils.js';
 async function seedCategories() {
     const categories = [
         {
-            name: 'Dog Food',
-            description: 'High-quality nutrition for your canine companions',
+            name: 'Smart Pet Accessories',
+            description: 'High-tech accessories for modern pets',
             isActive: true
         },
         {
-            name: 'Cat Food',
-            description: 'Premium nutrition for your feline friends',
+            name: 'Tech-Enhanced Pet Care',
+            description: 'Advanced technology for pet care and monitoring',
             isActive: true
         },
         {
-            name: 'Pet Toys',
-            description: 'Engaging toys for pets of all kinds',
+            name: 'Pet Training Devices',
+            description: 'Tools and devices for pet training',
             isActive: true
         },
         {
-            name: 'Pet Accessories',
-            description: 'Essential accessories for your pets',
+            name: 'Eco-Friendly Pet Products',
+            description: 'Sustainable and environmentally friendly pet products',
             isActive: true
         },
         {
-            name: 'Pet Health',
-            description: 'Health and wellness products for pets',
+            name: 'Customizable Pet Products',
+            description: 'Personalized products for your pets',
             isActive: true
         },
         {
-            name: 'Pet Grooming',
-            description: 'Grooming supplies and equipment',
+            name: 'Health and Wellness',
+            description: 'Products for pet health and wellness',
             isActive: true
         }
     ];
@@ -76,131 +76,358 @@ async function seedProducts() {
     const categoryMap = new Map(categories.map(cat => [cat.name, cat.id]));
 
     const products = [
-        // Dog Food Products
         {
-            name: 'Premium Puppy Kibble',
-            description: 'Specially formulated for growing puppies',
-            price: 29.99,
-            stockQuantity: 100,
-            sku: 'DOG-FOOD-001',
-            categoryId: categoryMap.get('Dog Food'),
-            isActive: true,
-            imageUrl: 'https://example.com/puppy-kibble.jpg'
+            name: "GPS Tracker Smart Collar",
+            description: "Keep track of your pet's location and activity with our GPS-enabled smart collar.",
+            price: 59.99,
+            stockQuantity: 50,
+            sku: "SMART-COLLAR-001",
+            brand: "TrackTail",
+            rating: 4.7,
+            mainImage: "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/gps-tracker/tracker_1.webp",
+            categoryId: categoryMap.get("Smart Pet Accessories"),
+            images: [
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/gps-tracker/tracker_1.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/gps-tracker/tracker_2.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/gps-tracker/tracker_3.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/gps-tracker/tracker_4.webp"
+            ],
+            features: [
+                {
+                    title: "Real-time GPS Tracking",
+                    description: "Monitor your pet's location in real-time through our mobile app"
+                },
+                {
+                    title: "Activity Monitoring",
+                    description: "Track your pet's daily activity levels and patterns"
+                },
+                {
+                    title: "Geofencing",
+                    description: "Set up safe zones and receive alerts when your pet leaves the area"
+                }
+            ],
+            specifications: [
+                { key: "Battery Life", value: "Up to 7 days" },
+                { key: "Water Resistance", value: "IP67 rated" },
+                { key: "Connectivity", value: "4G LTE & Bluetooth" },
+                { key: "Weight", value: "35 grams" },
+                { key: "Size Range", value: "Adjustable 12-20 inches" }
+            ]
         },
         {
-            name: 'Adult Dog Food - Chicken & Rice',
-            description: 'Complete nutrition for adult dogs',
-            price: 34.99,
-            stockQuantity: 150,
-            sku: 'DOG-FOOD-002',
-            categoryId: categoryMap.get('Dog Food'),
-            isActive: true,
-            imageUrl: 'https://example.com/adult-dog-food.jpg'
-        },
-        // Cat Food Products
-        {
-            name: 'Gourmet Cat Food - Salmon',
-            description: 'Premium salmon-based cat food',
-            price: 24.99,
-            stockQuantity: 120,
-            sku: 'CAT-FOOD-001',
-            categoryId: categoryMap.get('Cat Food'),
-            isActive: true,
-            imageUrl: 'https://example.com/cat-food-salmon.jpg'
-        },
-        {
-            name: 'Indoor Cat Formula',
-            description: 'Specialized nutrition for indoor cats',
-            price: 27.99,
-            stockQuantity: 100,
-            sku: 'CAT-FOOD-002',
-            categoryId: categoryMap.get('Cat Food'),
-            isActive: true,
-            imageUrl: 'https://example.com/indoor-cat-food.jpg'
-        },
-        // Pet Toys
-        {
-            name: 'Interactive Ball Toy',
-            description: 'Engaging ball toy for dogs',
-            price: 12.99,
-            stockQuantity: 200,
-            sku: 'TOY-001',
-            categoryId: categoryMap.get('Pet Toys'),
-            isActive: true,
-            imageUrl: 'https://example.com/ball-toy.jpg'
+            name: "Automatic Pet Feeder",
+            description: "Schedule and manage feeding times easily from your phone with our smart feeder.",
+            price: 99.99,
+            stockQuantity: 40,
+            sku: "SMART-FEEDER-001",
+            brand: "FeedSmart",
+            rating: 4.5,
+            mainImage: "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-feeder/pet-feeder-1.webp",
+            categoryId: categoryMap.get("Smart Pet Accessories"),
+            images: [
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-feeder/pet-feeder-1.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-feeder/pet-feeder-2.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-feeder/pet-feeder-3.webp"
+            ],
+            features: [
+                {
+                    title: "Smart Scheduling",
+                    description: "Set up to 6 feeding times per day through the mobile app"
+                },
+                {
+                    title: "Portion Control",
+                    description: "Precise portion control from 1/8 cup to 4 cups per meal"
+                },
+                {
+                    title: "Battery Backup",
+                    description: "Continues to function during power outages"
+                }
+            ],
+            specifications: [
+                { key: "Capacity", value: "6L / 25 cups of dry food" },
+                { key: "Power Source", value: "AC with battery backup" },
+                { key: "Connectivity", value: "Wi-Fi 2.4GHz" },
+                { key: "Material", value: "Food-grade BPA-free plastic" },
+                { key: "Dimensions", value: "12 x 8 x 15 inches" }
+            ]
         },
         {
-            name: 'Cat Wand Toy',
-            description: 'Interactive wand toy for cats',
-            price: 9.99,
-            stockQuantity: 150,
-            sku: 'TOY-002',
-            categoryId: categoryMap.get('Pet Toys'),
-            isActive: true,
-            imageUrl: 'https://example.com/wand-toy.jpg'
-        },
-        // Pet Accessories
-        {
-            name: 'Adjustable Dog Collar',
-            description: 'Comfortable collar for dogs of all sizes',
-            price: 14.99,
-            stockQuantity: 100,
-            sku: 'ACC-001',
-            categoryId: categoryMap.get('Pet Accessories'),
-            isActive: true,
-            imageUrl: 'https://example.com/dog-collar.jpg'
-        },
-        {
-            name: 'Cat Litter Box',
-            description: 'Covered litter box for privacy',
-            price: 29.99,
-            stockQuantity: 75,
-            sku: 'ACC-002',
-            categoryId: categoryMap.get('Pet Accessories'),
-            isActive: true,
-            imageUrl: 'https://example.com/litter-box.jpg'
-        },
-        // Pet Health Products
-        {
-            name: 'Joint Health Supplements',
-            description: 'Support healthy joints in dogs',
-            price: 39.99,
-            stockQuantity: 80,
-            sku: 'HEALTH-001',
-            categoryId: categoryMap.get('Pet Health'),
-            isActive: true,
-            imageUrl: 'https://example.com/joint-supplements.jpg'
+            name: "Wi-Fi Pet Camera",
+            description: "Monitor and interact with your pet remotely with our high-definition Wi-Fi camera.",
+            price: 120.99,
+            stockQuantity: 30,
+            sku: "PET-CAM-001",
+            brand: "EyePet",
+            rating: 4.8,
+            mainImage: "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-camera/pet-camera-1.webp",
+            categoryId: categoryMap.get("Tech-Enhanced Pet Care"),
+            images: [
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-camera/pet-camera-1.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-camera/pet-camera-2.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-camera/pet-camera-3.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-camera/pet-camera-4.webp"
+            ],
+            features: [
+                {
+                    title: "Two-Way Audio",
+                    description: "Talk to and hear your pet with clear two-way audio"
+                },
+                {
+                    title: "Night Vision",
+                    description: "Clear vision up to 30ft in complete darkness"
+                },
+                {
+                    title: "Treat Dispenser",
+                    description: "Remote treat dispensing capability"
+                }
+            ],
+            specifications: [
+                { key: "Resolution", value: "1080p HD" },
+                { key: "Field of View", value: "160° wide-angle" },
+                { key: "Night Vision", value: "850nm IR LEDs" },
+                { key: "Audio", value: "Two-way with noise cancellation" },
+                { key: "Storage", value: "Cloud + Local SD card up to 128GB" }
+            ]
         },
         {
-            name: 'Cat Hairball Control',
-            description: 'Natural hairball relief for cats',
+            name: "Scat Mat Training Pad",
+            description: "Train your pets to avoid areas of your home with this harmless scat mat.",
+            price: 44.99,
+            stockQuantity: 50,
+            sku: "TRAIN-MAT-001",
+            brand: "StayAway",
+            rating: 4.3,
+            mainImage: "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-mat/pet-mat-1.webp",
+            categoryId: categoryMap.get("Pet Training Devices"),
+            images: [
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-mat/pet-mat-1.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-mat/pet-mat-2.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-mat/pet-mat-3.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-mat/pet-mat-4.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-mat/pet-mat-5.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/pet-mat/pet-mat-6.webp"
+            ],
+            features: [
+                {
+                    title: "Safe Static Pulse",
+                    description: "Delivers harmless static pulse to discourage pets"
+                },
+                {
+                    title: "Waterproof Design",
+                    description: "Fully waterproof for indoor and outdoor use"
+                },
+                {
+                    title: "Adjustable Sensitivity",
+                    description: "Three levels of sensitivity for different pets"
+                }
+            ],
+            specifications: [
+                { key: "Size", value: "30 x 16 inches" },
+                { key: "Power", value: "3 x AAA batteries" },
+                { key: "Material", value: "Pet-safe PVC" },
+                { key: "Battery Life", value: "Up to 6 months" },
+                { key: "Sensitivity Levels", value: "3 adjustable levels" }
+            ]
+        },
+        {
+            name: "Eco-Friendly Dog Bed",
+            description: "Made from 100% recycled materials, our eco-friendly bed offers comfort and sustainability.",
+            price: 89.99,
+            stockQuantity: 20,
+            sku: "ECO-BED-001",
+            brand: "GreenPaws",
+            rating: 4.9,
+            mainImage: "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-bed/dog-bed-1.webp",
+            categoryId: categoryMap.get("Eco-Friendly Pet Products"),
+            images: [
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-bed/dog-bed-1.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-bed/dog-bed-2.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-bed/dog-bed-3.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-bed/dog-bed-4.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-bed/dog-bed-5.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-bed/dog-bed-6.webp"
+            ],
+            features: [
+                {
+                    title: "Recycled Materials",
+                    description: "Made from 100% post-consumer recycled plastics"
+                },
+                {
+                    title: "Orthopedic Support",
+                    description: "Memory foam provides joint support"
+                },
+                {
+                    title: "Machine Washable",
+                    description: "Easy to clean and maintain"
+                }
+            ],
+            specifications: [
+                { key: "Size", value: "36 x 28 x 9 inches" },
+                { key: "Material", value: "Recycled polyester, memory foam" },
+                { key: "Weight Capacity", value: "Up to 100 lbs" },
+                { key: "Care", value: "Machine washable cover" },
+                { key: "Warranty", value: "2 years" }
+            ]
+        },
+        {
+            name: "Recycled Material Cat Toy Set",
+            description: "Engage your cat with our environmentally friendly toy set made from recycled materials.",
             price: 19.99,
-            stockQuantity: 90,
-            sku: 'HEALTH-002',
-            categoryId: categoryMap.get('Pet Health'),
-            isActive: true,
-            imageUrl: 'https://example.com/hairball-control.jpg'
+            stockQuantity: 80,
+            sku: "ECO-TOY-001",
+            brand: "EcoPlay",
+            rating: 4.6,
+            mainImage: "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-toy-set/cat-toy-set-1.webp",
+            categoryId: categoryMap.get("Eco-Friendly Pet Products"),
+            images: [
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-toy-set/cat-toy-set-1.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-toy-set/cat-toy-set-2.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-toy-set/cat-toy-set-3.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-toy-set/cat-toy-set-4.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-toy-set/cat-toy-set-5.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-toy-set/cat-toy-set-6.webp"
+            ],
+            features: [
+                {
+                    title: "Eco-Friendly Materials",
+                    description: "Made from recycled and sustainable materials"
+                },
+                {
+                    title: "Interactive Play",
+                    description: "Various toys for different play styles"
+                },
+                {
+                    title: "Safe Design",
+                    description: "No small parts or harmful materials"
+                }
+            ],
+            specifications: [
+                { key: "Set Contents", value: "6 different toys" },
+                { key: "Materials", value: "Recycled plastic, organic catnip" },
+                { key: "Safety", value: "Non-toxic, pet-safe dyes" },
+                { key: "Age Range", value: "All ages" },
+                { key: "Package Weight", value: "12 oz" }
+            ]
         },
-        // Pet Grooming Products
         {
-            name: 'Professional Dog Shampoo',
-            description: 'Gentle, pH-balanced dog shampoo',
-            price: 16.99,
-            stockQuantity: 120,
-            sku: 'GROOM-001',
-            categoryId: categoryMap.get('Pet Grooming'),
-            isActive: true,
-            imageUrl: 'https://example.com/dog-shampoo.jpg'
+            name: "Personalized Dog Collar",
+            description: "Customize with your dog's name and your contact information with stylish fonts and colors.",
+            price: 29.99,
+            stockQuantity: 60,
+            sku: "CUSTOM-COLLAR-001",
+            brand: "CollarCustom",
+            rating: 4.7,
+            mainImage: "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-collar/dog-collar-1.webp",
+            categoryId: categoryMap.get("Customizable Pet Products"),
+            images: [
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-collar/dog-collar-1.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-collar/dog-collar-2.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-collar/dog-collar-3.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-collar/dog-collar-4.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-collar/dog-collar-5.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-collar/dog-collar-6.webp"
+            ],
+            features: [
+                {
+                    title: "Custom Engraving",
+                    description: "Personalized engraving with name and contact info"
+                },
+                {
+                    title: "Adjustable Design",
+                    description: "Easy-to-adjust buckle for perfect fit"
+                },
+                {
+                    title: "Reflective Stitching",
+                    description: "High-visibility reflective threading for night safety"
+                }
+            ],
+            specifications: [
+                { key: "Material", value: "Premium nylon webbing" },
+                { key: "Sizes Available", value: "XS to XL" },
+                { key: "Width", value: "1 inch" },
+                { key: "Buckle Type", value: "Quick-release safety buckle" },
+                { key: "Color Options", value: "8 different colors" }
+            ]
         },
         {
-            name: 'Pet Grooming Brush',
-            description: 'Suitable for both cats and dogs',
-            price: 21.99,
-            stockQuantity: 100,
-            sku: 'GROOM-002',
-            categoryId: categoryMap.get('Pet Grooming'),
-            isActive: true,
-            imageUrl: 'https://example.com/grooming-brush.jpg'
+            name: "Probiotic Dog Supplement",
+            description: "Support your dog's digestive health with our vet-approved probiotic supplement.",
+            price: 39.99,
+            stockQuantity: 55,
+            sku: "HEALTH-PROB-001",
+            brand: "VitaPup",
+            rating: 4.5,
+            mainImage: "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-biotic/dog-biotic-1.webp",
+            categoryId: categoryMap.get("Health and Wellness"),
+            images: [
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-biotic/dog-biotic-1.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-biotic/dog-biotic-2.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-biotic/dog-biotic-3.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-biotic/dog-biotic-4.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-biotic/dog-biotic-5.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/dog-biotic/dog-biotic-6.webp"
+            ],
+            features: [
+                {
+                    title: "Veterinarian Formulated",
+                    description: "Developed by pet nutrition experts"
+                },
+                {
+                    title: "Multiple Strains",
+                    description: "Contains 6 beneficial probiotic strains"
+                },
+                {
+                    title: "Easy Administration",
+                    description: "Chicken-flavored chewable tablets"
+                }
+            ],
+            specifications: [
+                { key: "Form", value: "Chewable tablets" },
+                { key: "Count", value: "60 tablets per bottle" },
+                { key: "Active Ingredients", value: "6 probiotic strains" },
+                { key: "CFUs", value: "5 billion per tablet" },
+                { key: "Storage", value: "Room temperature stable" }
+            ]
+        },
+        {
+            name: "Prescription Diet Cat Food",
+            description: "Specially formulated food to manage your cat's health needs prescribed by veterinarians.",
+            price: 34.99,
+            stockQuantity: 40,
+            sku: "HEALTH-DIET-001",
+            brand: "HealthBites",
+            rating: 4.8,
+            mainImage: "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-pres-bag/cat-pres-bag-1.webp",
+            categoryId: categoryMap.get("Health and Wellness"),
+            images: [
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-pres-bag/cat-pres-bag-1.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-pres-bag/cat-pres-bag-2.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-pres-bag/cat-pres-bag-3.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-pres-bag/cat-pres-bag-4.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-pres-bag/cat-pres-bag-5.webp",
+                "https://digitailpets.s3.ap-southeast-2.amazonaws.com/pet-products-images/cat-pres-bag/cat-pres-bag-6.webp"
+            ],
+            features: [
+                {
+                    title: "Prescription Formula",
+                    description: "Specially formulated for specific health conditions"
+                },
+                {
+                    title: "High-Quality Protein",
+                    description: "Premium protein sources for optimal nutrition"
+                },
+                {
+                    title: "Balanced Nutrients",
+                    description: "Complete and balanced nutrition for adult cats"
+                }
+            ],
+            specifications: [
+                { key: "Package Size", value: "5.5 lb bag" },
+                { key: "Life Stage", value: "Adult" },
+                { key: "Special Diet", value: "Prescription required" },
+                { key: "Protein Content", value: "32% minimum" },
+                { key: "Calories", value: "375 kcal/cup" }
+            ]
         }
     ];
 
@@ -225,9 +452,24 @@ async function seedProducts() {
                         price: product.price,
                         stockQuantity: product.stockQuantity,
                         sku: product.sku,
+                        brand: product.brand,
+                        rating: product.rating,
+                        mainImage: product.mainImage,
                         categoryId: product.categoryId,
-                        isActive: product.isActive,
-                        imageUrl: product.imageUrl
+                        isActive: true,
+                        images: {
+                            create: product.images.map((url, index) => ({
+                                url,
+                                isMain: index === 0,
+                                sortOrder: index
+                            }))
+                        },
+                        features: {
+                            create: product.features
+                        },
+                        specifications: {
+                            create: product.specifications
+                        }
                     }
                 });
                 console.log(`Created product: ${product.name}`);
@@ -328,9 +570,9 @@ async function main() {
     
     try {
         // Comment out the seeding functions you don't want to run
-        // await seedRoles();
-        // await seedAdminUser();
-        // await seedCategories();
+        await seedRoles();
+        await seedAdminUser();
+        await seedCategories();
         await seedProducts();
         
         console.log('Seeding completed successfully');

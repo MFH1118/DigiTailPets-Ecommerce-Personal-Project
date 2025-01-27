@@ -1,8 +1,8 @@
 // prisma/schema.prisma
 
 datasource db {
-  provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
   // uncomment next line if you use Prisma <5.10
   // directUrl = env("DATABASE_URL_UNPOOLED")
 }
@@ -12,303 +12,350 @@ generator client {
 }
 
 model User {
-  id              String         @id @default(uuid())
-  username        String         @unique @map("user_name")
-  email           String         @unique @map("user_email")
-  firstName       String         @map("user_first_name")
-  lastName        String         @map("user_last_name")
-  dateOfBirth     DateTime       @map("user_dob")
-  dateCreated     DateTime       @default(now()) @map("user_date_created")
-  lastLogin       DateTime?      @map("user_last_login")
-  isActive        Boolean        @default(true) @map("user_is_active")
-  
-  // Relations
-  role            Role           @relation(fields: [roleId], references: [id])
-  roleId          String         @map("role_id")
-  authentication  Authentication?
-  sessions        Session[]      
-  addresses       Address[]
-  carts           Cart?
-  wishList        WishList?
-  orders          Order[]
-  payments        PaymentDetails[]
-  auditlogs       AuditLog[]
+  id          String    @id @default(uuid())
+  username    String    @unique @map("user_name")
+  email       String    @unique @map("user_email")
+  firstName   String    @map("user_first_name")
+  lastName    String    @map("user_last_name")
+  dateOfBirth DateTime  @map("user_dob")
+  dateCreated DateTime  @default(now()) @map("user_date_created")
+  lastLogin   DateTime? @map("user_last_login")
+  isActive    Boolean   @default(true) @map("user_is_active")
 
-  @@map("users")
+  // Relations
+  role           Role             @relation(fields: [roleId], references: [id])
+  roleId         String           @map("role_id")
+  authentication Authentication?
+  sessions       Session[]
+  addresses      Address[]
+  carts          Cart?
+  wishList       WishList?
+  orders         Order[]
+  payments       PaymentDetails[]
+  auditlogs      AuditLog[]
+
   @@index([email])
   @@index([username])
   @@index([isActive])
+  @@map("users")
 }
 
 model Address {
-  id          String   @id @default(uuid()) @map("address_id")
-  street1     String   @map("address_street_1")
-  street2     String?  @map("address_street_2")
-  city        String   @map("address_city")
-  state       String   @map("address_state")
-  postalCode  String   @map("address_postal_code")
-  country     String   @map("address_country")
-  addressType String   @map("address_type")
-  isDefault   Boolean  @default(false) @map("address_is_default")
+  id          String  @id @default(uuid()) @map("address_id")
+  street1     String  @map("address_street_1")
+  street2     String? @map("address_street_2")
+  city        String  @map("address_city")
+  state       String  @map("address_state")
+  postalCode  String  @map("address_postal_code")
+  country     String  @map("address_country")
+  addressType String  @map("address_type")
+  isDefault   Boolean @default(false) @map("address_is_default")
 
   // Relations
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String   @map("user_id")
-  order       Order[]
+  user   User    @relation(fields: [userId], references: [id])
+  userId String  @map("user_id")
+  order  Order[]
 
-  @@map("addresses")
   @@index([userId, addressType])
   @@index([isDefault])
+  @@map("addresses")
 }
 
 model Role {
-  id          String   @id @default(uuid())
-  name        String   @unique @map("role_name")
-  description String?  @map("role_desc")
+  id          String  @id @default(uuid())
+  name        String  @unique @map("role_name")
+  description String? @map("role_desc")
   users       User[]
 
   @@map("roles")
 }
 
 model Authentication {
-  id              String    @id @default(uuid())
-  passwordHash    String    @map("auth_password_hash")
-  passwordReset   String?   @map("auth_password_reset")
-  loginAttempts   Int       @default(0) @map("auth_login_attempts")
-  lockoutEndTime  DateTime? @map("auth_lockout_end_time")
-  
-  // Relations
-  user            User      @relation(fields: [userId], references: [id])
-  userId          String    @unique @map("user_id")
+  id             String    @id @default(uuid())
+  passwordHash   String    @map("auth_password_hash")
+  passwordReset  String?   @map("auth_password_reset")
+  loginAttempts  Int       @default(0) @map("auth_login_attempts")
+  lockoutEndTime DateTime? @map("auth_lockout_end_time")
 
-  @@map("authentications")
+  // Relations
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique @map("user_id")
+
   @@index([loginAttempts, lockoutEndTime])
+  @@map("authentications")
 }
 
 model Session {
-  id                String    @id @default(uuid()) @map("session_id")
-  userId            String    @map("user_id")
-  token             String    @unique @map("session_token")
-  expiry            DateTime  @map("session_expiry")
-  type              String    @map("session_type")
-  creationTime      DateTime  @default(now()) @map("session_creation_time")
-  lastAccessed      DateTime  @default(now()) @map("session_last_accessed")
+  id           String   @id @default(uuid()) @map("session_id")
+  userId       String   @map("user_id")
+  token        String   @unique @map("session_token")
+  expiry       DateTime @map("session_expiry")
+  type         String   @map("session_type")
+  creationTime DateTime @default(now()) @map("session_creation_time")
+  lastAccessed DateTime @default(now()) @map("session_last_accessed")
 
   // Relations
-  user              User      @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  @@map("sessions")
   @@index([token])
   @@index([expiry])
   @@index([userId, expiry])
+  @@map("sessions")
 }
 
 model Product {
-  id              String         @id @default(uuid()) @map("prod_id")
-  name            String         @map("prod_name")
-  description     String?        @map("prod_desc")
-  price           Decimal        @map("prod_price") @db.Decimal(10, 2)
-  stockQuantity   Int            @map("prod_stock_quantity")
-  isActive        Boolean        @default(true) @map("prod_is_active")
-  sku             String         @unique @map("prod_sku")
-  imageUrl        String?        @map("prod_image_url")
-  dateAdded       DateTime       @default(now()) @map("prod_added_date")
-  dateModified    DateTime?      @updatedAt @map("prod_modified_date") 
+  id            String    @id @default(uuid()) @map("prod_id")
+  name          String    @map("prod_name")
+  description   String?   @map("prod_desc")
+  price         Decimal   @map("prod_price") @db.Decimal(10, 2)
+  stockQuantity Int       @map("prod_stock_quantity")
+  isActive      Boolean   @default(true) @map("prod_is_active")
+  sku           String    @unique @map("prod_sku")
+  brand         String    @map("prod_brand")
+  rating        Decimal   @map("prod_rating")
+  mainImage     String?   @map("prod_main_image")
+  dateAdded     DateTime  @default(now()) @map("prod_added_date")
+  dateModified  DateTime? @updatedAt @map("prod_modified_date")
 
   // Relations
-  category        Category       @relation(fields: [categoryId], references: [id])
-  categoryId      String         @map("category_id")
-  cartItems       CartItem[]
-  wishListItems   WishListItem[]
-  orderItems      OrderItem[]
+  category       Category               @relation(fields: [categoryId], references: [id])
+  categoryId     String                 @map("category_id")
+  images         ProductImage[]
+  features       ProductFeature[]
+  specifications ProductSpecification[]
+  cartItems      CartItem[]
+  wishListItems  WishListItem[]
+  orderItems     OrderItem[]
 
-  @@map("products")
   @@index([categoryId])
   @@index([sku])
   @@index([isActive, categoryId])
   @@index([name])
   @@index([price])
   @@index([stockQuantity])
+  @@index([brand])
+  @@index([rating])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(uuid()) @map("prod_image_id")
+  url       String  @map("prod_image_url")
+  isMain    Boolean @default(false) @map("prod_image_is_main")
+  sortOrder Int     @map("prod_image_sort_order")
+
+  // Relations
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @map("prod_id")
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model ProductFeature {
+  id          String  @id @default(uuid()) @map("prod_feature_id")
+  title       String  @map("prod_feature_title")
+  description String? @map("prod_feature_desc")
+
+  // Relations
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @map("prod_id")
+
+  @@index([productId])
+  @@map("product_features")
+}
+
+model ProductSpecification {
+  id    String @id @default(uuid()) @map("prod_spec_id")
+  key   String @map("prod_spec_key")
+  value String @map("prod_spec_value")
+
+  // Relations
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @map("prod_id")
+
+  @@index([productId])
+  @@map("product_specifications")
 }
 
 model Category {
-  id          String    @id @default(uuid()) @map("category_id")
-  name        String    @unique @map("category_name")
-  description String?   @map("category_desc")
-  isActive    Boolean   @default(true) @map("category_is_active")
+  id          String  @id @default(uuid()) @map("category_id")
+  name        String  @unique @map("category_name")
+  description String? @map("category_desc")
+  isActive    Boolean @default(true) @map("category_is_active")
 
   // Relations
-  products    Product[]
+  products Product[]
 
-  @@map("categories")
   @@index([isActive])
+  @@map("categories")
 }
 
 model Cart {
-  id              String      @id @default(uuid()) @map("cart_id")
-  creationDate    DateTime    @default(now()) @map("cart_creation_date")
-  lastUpdate      DateTime    @updatedAt @map("cart_last_update")
-  
+  id           String   @id @default(uuid()) @map("cart_id")
+  creationDate DateTime @default(now()) @map("cart_creation_date")
+  lastUpdate   DateTime @updatedAt @map("cart_last_update")
+
   // Relations
-  user            User        @relation(fields: [userId], references: [id])
-  userId          String      @unique @map("user_id")
-  items           CartItem[]
+  user   User       @relation(fields: [userId], references: [id])
+  userId String     @unique @map("user_id")
+  items  CartItem[]
 
   @@map("carts")
 }
 
 model CartItem {
-  id          String    @id @default(uuid()) @map("cart_item_id")
-  quantity    Int       @map("cart_item_quantity")
-  unitPrice   Decimal   @map("cart_item_unitprice") @db.Decimal(10, 2)
-  subtotal    Decimal   @map("cart_item_subtotal") @db.Decimal(10, 2)
+  id        String  @id @default(uuid()) @map("cart_item_id")
+  quantity  Int     @map("cart_item_quantity")
+  unitPrice Decimal @map("cart_item_unitprice") @db.Decimal(10, 2)
+  subtotal  Decimal @map("cart_item_subtotal") @db.Decimal(10, 2)
 
   // Relations
-  cart        Cart      @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  cartId      String    @map("cart_id")
-  product     Product   @relation(fields: [productId], references: [id])
-  productId   String    @map("prod_id")
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    String  @map("cart_id")
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @map("prod_id")
 
-  @@map("cart_items")
   @@unique([cartId, productId])
   @@index([cartId])
   @@index([productId])
+  @@map("cart_items")
 }
 
 model WishList {
-  id            String         @id @default(uuid()) @map("wishlist_id")
-  dateCreated   DateTime       @default(now()) @map("wishlist_creation_date")
-  lastUpdated   DateTime       @updatedAt @map("wishlist_last_update")
+  id          String   @id @default(uuid()) @map("wishlist_id")
+  dateCreated DateTime @default(now()) @map("wishlist_creation_date")
+  lastUpdated DateTime @updatedAt @map("wishlist_last_update")
 
   // Relations
-  user          User           @relation(fields: [userId], references: [id])
-  userId        String         @unique @map("user_id")
-  items         WishListItem[]
+  user   User           @relation(fields: [userId], references: [id])
+  userId String         @unique @map("user_id")
+  items  WishListItem[]
 
-  @@map("wishlists")
   @@index([userId])
+  @@map("wishlists")
 }
 
 model WishListItem {
-  id          String    @id @default(uuid()) @map("wishlist_item_id")
-  dateAdded   DateTime  @default(now()) @map("wishlist_item_adddate")
-  
-  // Relations
-  wishList    WishList  @relation(fields: [wishListId], references: [id])
-  wishListId  String    @map("wishlist_id")
-  product     Product   @relation(fields: [productId], references: [id])
-  productId   String    @map("prod_id")
+  id        String   @id @default(uuid()) @map("wishlist_item_id")
+  dateAdded DateTime @default(now()) @map("wishlist_item_adddate")
 
-  @@map("wishlist_items")
+  // Relations
+  wishList   WishList @relation(fields: [wishListId], references: [id])
+  wishListId String   @map("wishlist_id")
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String   @map("prod_id")
+
   @@unique([wishListId, productId])
   @@index([productId])
   @@index([wishListId])
+  @@map("wishlist_items")
 }
 
 model Order {
-  id              String         @id @default(uuid()) @map("order_id")
-  orderDate       DateTime       @default(now()) @map("order_date")
-  orderTotal      Decimal        @map("order_total") @db.Decimal(10, 2)
-  orderStatus     OrderStatus    @default(PENDING) @map("order_status")
-  paymentStatus   PaymentStatus  @default(PENDING) @map("payment_status")
-  lastUpdated     DateTime       @updatedAt @map("last_updated")
+  id            String        @id @default(uuid()) @map("order_id")
+  orderDate     DateTime      @default(now()) @map("order_date")
+  orderTotal    Decimal       @map("order_total") @db.Decimal(10, 2)
+  orderStatus   OrderStatus   @default(PENDING) @map("order_status")
+  paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
+  lastUpdated   DateTime      @updatedAt @map("last_updated")
 
   // Relations
-  user            User            @relation(fields: [userId], references: [id])
-  userId          String          @map("user_id")
-  address         Address?        @relation(fields: [addressId], references: [id])
-  addressId       String?         @map("address_id")
-  payment         PaymentDetails? @relation(fields: [paymentId], references: [id])
-  paymentId       String?         @map("payment_id")
-  shipment        Shipments?      @relation(fields: [shippingId], references: [id])
-  shippingId      String?         @unique @map("shipping_id")
-  orderItems      OrderItem[]
+  user       User            @relation(fields: [userId], references: [id])
+  userId     String          @map("user_id")
+  address    Address?        @relation(fields: [addressId], references: [id])
+  addressId  String?         @map("address_id")
+  payment    PaymentDetails? @relation(fields: [paymentId], references: [id])
+  paymentId  String?         @map("payment_id")
+  shipment   Shipments?      @relation(fields: [shippingId], references: [id])
+  shippingId String?         @unique @map("shipping_id")
+  orderItems OrderItem[]
 
-  @@map("orders")
   @@index([userId])
   @@index([orderStatus])
   @@index([orderDate])
   @@index([paymentStatus])
   @@index([userId, orderStatus])
   @@index([userId, orderDate])
+  @@map("orders")
 }
 
 model OrderItem {
-  id              String    @id @default(uuid()) @map("order_item_id")
-  quantity        Int       @map("order_quantity")
-  unitPrice       Decimal   @map("order_unitprice") @db.Decimal(10, 2)
-  subtotal        Decimal   @map("order_subtotal") @db.Decimal(10, 2)
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  id        String   @id @default(uuid()) @map("order_item_id")
+  quantity  Int      @map("order_quantity")
+  unitPrice Decimal  @map("order_unitprice") @db.Decimal(10, 2)
+  subtotal  Decimal  @map("order_subtotal") @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId         String    @map("order_id")
-  product         Product   @relation(fields: [productId], references: [id])
-  productId       String    @map("product_id")
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String  @map("order_id")
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @map("product_id")
 
-  @@map("order_items")
   @@index([orderId])
   @@index([productId])
+  @@map("order_items")
 }
 
 model PaymentDetails {
-  id                    String         @id @default(uuid()) @map("payment_id")
-  amount                Decimal        @map("payment_amount") @db.Decimal(10, 2)
-  currency              String         @map("payment_currency")
-  method                String         @map("payment_method")
-  provider              String         @map("payment_provider")
-  status                PaymentStatus  @default(PENDING) @map("payment_status")
-  transactionDate       DateTime       @default(now()) @map("payment_transaction_date")
-  authorizationCode     String?        @map("payment_authorization_code")
-  lastFourDigits        String?        @map("payment_four_digit_num")
-  expirationDate        DateTime?      @map("payment_expiration_date")
-  
-  // Relations
-  user                  User           @relation(fields: [userId], references: [id])
-  userId                String         @map("user_id")
-  order                 Order[]
+  id                String        @id @default(uuid()) @map("payment_id")
+  amount            Decimal       @map("payment_amount") @db.Decimal(10, 2)
+  currency          String        @map("payment_currency")
+  method            String        @map("payment_method")
+  provider          String        @map("payment_provider")
+  status            PaymentStatus @default(PENDING) @map("payment_status")
+  transactionDate   DateTime      @default(now()) @map("payment_transaction_date")
+  authorizationCode String?       @map("payment_authorization_code")
+  lastFourDigits    String?       @map("payment_four_digit_num")
+  expirationDate    DateTime?     @map("payment_expiration_date")
 
-  @@map("payment_details")
+  // Relations
+  user   User    @relation(fields: [userId], references: [id])
+  userId String  @map("user_id")
+  order  Order[]
+
   @@index([userId])
   @@index([status])
   @@index([transactionDate])
   @@index([userId, status])
+  @@map("payment_details")
 }
 
 model Shipments {
-  id                String          @id @default(uuid()) @map("shipment_id")
-  carrier           String          @map("shipment_carrier")
-  trackingNumber    String?         @map("shipment_tracking_num")
-  shipmentDate      DateTime        @default(now()) @map("shipment_date")
-  estimatedDelivery DateTime?       @map("shipment_est_delivery")
-  actualDelivery    DateTime?       @map("shipment_actual_delivery")
-  status            ShipmentStatus  @default(PENDING) @map("shipment_status")
-  
-  // Relations
-  order             Order?
+  id                String         @id @default(uuid()) @map("shipment_id")
+  carrier           String         @map("shipment_carrier")
+  trackingNumber    String?        @map("shipment_tracking_num")
+  shipmentDate      DateTime       @default(now()) @map("shipment_date")
+  estimatedDelivery DateTime?      @map("shipment_est_delivery")
+  actualDelivery    DateTime?      @map("shipment_actual_delivery")
+  status            ShipmentStatus @default(PENDING) @map("shipment_status")
 
-  @@map("shipments")
+  // Relations
+  order Order?
+
   @@index([status])
   @@index([shipmentDate])
+  @@map("shipments")
 }
 
 model AuditLog {
-  id          String    @id @default(uuid()) @map("auditlog_id")
-  action      String    @map("auditlog_action")
-  timestamp   DateTime  @default(now()) @map("auditlog_timestamp")
-  ipAddress   String    @map("auditlog_ip_address")
-  details     String?   @map("auditlog_details")
+  id        String   @id @default(uuid()) @map("auditlog_id")
+  action    String   @map("auditlog_action")
+  timestamp DateTime @default(now()) @map("auditlog_timestamp")
+  ipAddress String   @map("auditlog_ip_address")
+  details   String?  @map("auditlog_details")
 
   // Relations
-  user       User       @relation(fields: [userId], references: [id])
-  userId      String    @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
 
-  @@map("audit_logs")
   @@index([userId])
   @@index([timestamp])
   @@index([action])
   @@index([userId, timestamp])
+  @@map("audit_logs")
 }
 
 enum OrderStatus {
