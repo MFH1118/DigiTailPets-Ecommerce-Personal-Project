@@ -6,10 +6,12 @@ const nextConfig = {
           protocol: 'https',
           hostname: 'digitailpets.s3.ap-southeast-2.amazonaws.com',
           port: '',
-          pathname: '/pet-products-images/**',
+          pathname: '/**',
         },
       ],
     },
+    trailingSlash: false,
+    skipTrailingSlashRedirect: false,
 }
 
 export default nextConfig;
