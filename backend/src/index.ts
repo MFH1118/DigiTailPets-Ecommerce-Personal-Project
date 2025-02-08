@@ -5,12 +5,16 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import useragent from 'express-useragent';
 import cookieParser from 'cookie-parser';
+import { toNodeHandler } from 'better-auth/node';
+import { auth } from '../src/lib/auth.js';
 
 dotenv.config();
 
 const app: Express = express();
 
 const PORT: number = parseInt(process.env.BACKEND_PORT || '5000', 10);
+
+app.all('/api/auth/*', toNodeHandler(auth));
 
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
