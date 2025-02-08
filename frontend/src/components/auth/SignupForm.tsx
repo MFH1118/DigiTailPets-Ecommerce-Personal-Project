@@ -19,9 +19,11 @@ import { signupSchema } from "@/schemas/auth";
 import { SignupFormValues } from "@/types/auth";
 import AuthLayout from "@/components/auth/AuthLayout";
 import Image from "next/image";
+import LoadingButton from "@/components/LoadingButton";
 
 const SignupForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -35,8 +37,17 @@ const SignupForm = () => {
   });
 
   const onSubmit = async (values: SignupFormValues) => {
-    console.log(values);
-    // Handle form submission
+    setIsLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      console.log(values);
+      
+    } catch (error) {
+      console.log('Signup error: ', error);
+      
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignup = () => {
@@ -165,12 +176,19 @@ const SignupForm = () => {
               )}
             />
 
-            <Button
+            {/* <Button
               type="submit"
               className="w-full bg-gray-900 text-white hover:bg-gray-800"
             >
               Continue
-            </Button>
+            </Button> */}
+            <LoadingButton
+              type="submit"
+              className="w-full bg-gray-900 text-white hover:bg-gray-800"
+              loading={isLoading}
+            >
+              Continue
+            </LoadingButton>
           </form>
         </Form>
 
