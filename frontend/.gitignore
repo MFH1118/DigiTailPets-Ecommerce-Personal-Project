@@ -37,3 +37,4 @@ next-env.d.ts
 
 # product images
 /public/pet-products-images
+/public/illustration/

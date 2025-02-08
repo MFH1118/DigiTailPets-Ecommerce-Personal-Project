@@ -35,7 +35,7 @@ const Footer = () => {
         <div className="flex justify-center py-12">
           <div className="flex items-center gap-6">
             <Image
-              src="https://digitailpets.s3.ap-southeast-2.amazonaws.com/illustration/newsletter-illustration.jpg"
+              src="/illustration/newsletter-illustration.jpg"
               alt="Pets Illustration"
               width={150}
               height={150}
