@@ -11,6 +11,12 @@ export const auth = betterAuth({
         openAPI()
     ],
     emailAndPassword: {
-        enabled: true
+        enabled: true,
+        requireEmailVerification: true
+    },
+    user: {
+        deleteUser: {
+            enabled: true
+        }
     }
 });
