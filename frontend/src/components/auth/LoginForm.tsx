@@ -19,9 +19,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
+import LoadingButton from "@/components/LoadingButton";
+import { useToast } from "@/hooks/use-toast";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<SigninFormValues>({
     resolver: zodResolver(signinSchema),
@@ -32,7 +39,47 @@ const LoginForm = () => {
   });
 
   const onSubmit = async (values: SigninFormValues) => {
-    console.log(values);
+    const { email, password } = values;
+
+    try {
+      await authClient.signIn.email({
+        email,
+        password
+      }, {
+        onRequest: () => {
+          setIsLoading(true);
+        },
+        onSuccess: () => {
+          setIsLoading(false);
+          toast({
+            title: 'Sign in success',
+            description: 'You have successfully signed in.',
+          });
+          router.push('/');
+          router.refresh();
+        },
+        onError: (ctx) => {
+          setIsLoading(false);
+          toast({
+            title: 'Sign in failed',
+            description: ctx.error.message || "An error occurred while signing in.",
+            variant: 'destructive'
+          })
+        }
+
+      });
+      
+    } catch (error: any) {
+      setIsLoading(false);
+      console.error('Sign in error:', error);
+      toast({
+        title: 'Sign in failed',
+        description: error.message || "An error occurred while creating your account.",
+        variant: 'destructive'
+      });
+      
+    }
+
   };
 
   const handleGoogleSignin = () => {};
@@ -128,12 +175,13 @@ const LoginForm = () => {
               </Link>
             </div>
 
-            <Button
+            <LoadingButton
               type="submit"
               className="w-full bg-gray-900 text-white hover:bg-gray-800"
+              loading={isLoading}
             >
               Sign In
-            </Button>
+            </LoadingButton>
           </form>
         </Form>
 
