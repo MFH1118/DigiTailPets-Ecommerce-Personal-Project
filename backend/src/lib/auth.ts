@@ -4,7 +4,6 @@ import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { openAPI } from 'better-auth/plugins';
 import { prisma } from '../db/prisma.js';
-import { createAuthMiddleware, APIError } from 'better-auth/api';
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
@@ -15,11 +14,17 @@ export const auth = betterAuth({
         openAPI(),
     ],
     emailAndPassword: {
-        enabled: true
+        enabled: true,
+        autoSignIn: false
     },
     user: {
         deleteUser: {
             enabled: true
         }
-    }
+    },
+    trustedOrigins: [
+        "http://localhost:3000",
+        "https://localhost:5000",
+        "https://localhost:5000/api/auth"
+    ]
 });

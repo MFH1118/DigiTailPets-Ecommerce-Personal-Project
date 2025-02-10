@@ -8,9 +8,8 @@ export const authClient = createAuthClient({
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     },
-    mode: 'cors', // Add this
+    mode: 'cors',
     fetch: {
-        // Fetch-specific options
         credentials: 'include',
         mode: 'cors',
         headers: {
@@ -19,7 +18,6 @@ export const authClient = createAuthClient({
         }
     },
     onRequest: async (context: any) => {
-        // Log requests for debugging
         console.log('Auth request:', {
             url: context.url,
             method: context.method,
@@ -28,7 +26,6 @@ export const authClient = createAuthClient({
         return context;
     },
     onError: (error: any) => {
-        // Log errors for debugging
         console.error('Auth client error:', error);
     }
 });

@@ -59,9 +59,9 @@ const SignupForm = () => {
           setIsLoading(false);
           toast({
             title: "Account Created",
-            description: "Your account has been created successfully."
+            description: "Your account has been created successfully. Please login"
           });
-          router.push("/");
+          router.push("/signin");
           router.refresh();
         },
         onError: (ctx) => {
@@ -200,7 +200,7 @@ const SignupForm = () => {
               className="w-full bg-gray-900 text-white hover:bg-gray-800"
               loading={isLoading}
             >
-              Continue
+              Sign Up
             </LoadingButton>
           </form>
         </Form>
