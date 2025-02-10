@@ -62,7 +62,6 @@ const SignupForm = () => {
             description: "Your account has been created successfully. Please login"
           });
           router.push("/signin");
-          router.refresh();
         },
         onError: (ctx) => {
           setIsLoading(false);

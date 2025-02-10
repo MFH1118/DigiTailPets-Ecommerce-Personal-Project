@@ -56,7 +56,6 @@ const LoginForm = () => {
             description: 'You have successfully signed in.',
           });
           router.push('/');
-          router.refresh();
         },
         onError: (ctx) => {
           setIsLoading(false);

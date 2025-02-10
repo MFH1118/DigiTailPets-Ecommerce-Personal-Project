@@ -1,5 +1,5 @@
 //src/components/layout/header.tsx
-import TopHeader from '@/components/TopHeader';
+import TopHeader from '@/components/layout/TopHeader';
 import NavigationHeader from '@/components/NavigationHeader';
 
 const Header = () => {
