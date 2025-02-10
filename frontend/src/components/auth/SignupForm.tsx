@@ -1,7 +1,7 @@
-// src/components/auth/SignupForm.tsx
+// frontend/src/components/auth/SignupForm.tsx
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -20,33 +20,66 @@ import { SignupFormValues } from "@/types/auth";
 import AuthLayout from "@/components/auth/AuthLayout";
 import Image from "next/image";
 import LoadingButton from "@/components/LoadingButton";
+import { useToast } from "@/hooks/use-toast"
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const SignupForm = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
-      mobileNumber: "",
       email: "",
-      password: "",
+      password: ""
     },
   });
 
   const onSubmit = async (values: SignupFormValues) => {
-    setIsLoading(true);
+    const { firstName, lastName, email, password } = values;
+    const name = `${firstName} ${lastName}`;
+    
+    console.log('Attempting signup with:', { email, name });
+    
     try {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      console.log(values);
-      
-    } catch (error) {
-      console.log('Signup error: ', error);
-      
-    } finally {
+      await authClient.signUp.email({
+        email,
+        password,
+        name
+      }, {
+        onRequest: () => {
+          setIsLoading(true);
+        },
+        onSuccess: () => {
+          setIsLoading(false);
+          toast({
+            title: "Account Created",
+            description: "Your account has been created successfully."
+          });
+          router.push("/");
+          router.refresh();
+        },
+        onError: (ctx) => {
+          setIsLoading(false);
+          toast({
+            title: "Error",
+            description: ctx.error.message || "An error occurred while creating your account.",
+            variant: "destructive"
+          });
+        }
+      });
+    } catch (error: any) {
       setIsLoading(false);
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred while creating your account.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -114,19 +147,6 @@ const SignupForm = () => {
 
             <FormField
               control={form.control}
-              name="mobileNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Mobile Number*" type="tel" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
@@ -175,13 +195,6 @@ const SignupForm = () => {
                 </FormItem>
               )}
             />
-
-            {/* <Button
-              type="submit"
-              className="w-full bg-gray-900 text-white hover:bg-gray-800"
-            >
-              Continue
-            </Button> */}
             <LoadingButton
               type="submit"
               className="w-full bg-gray-900 text-white hover:bg-gray-800"

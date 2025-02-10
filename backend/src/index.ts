@@ -1,4 +1,4 @@
-// src/index.ts
+// backend/src/index.ts
 
 import express, { Express, Request, Response, Application} from 'express';
 import dotenv from 'dotenv';
@@ -14,13 +14,22 @@ const app: Express = express();
 
 const PORT: number = parseInt(process.env.BACKEND_PORT || '5000', 10);
 
+
+
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+}));
+
 app.all('/api/auth/*', toNodeHandler(auth));
 
 app.use(express.json());
-app.use(cookieParser(process.env.COOKIE_SECRET));
-app.use(cors());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(useragent.express());
+
 
 // Routes
 app.get('/', (req: Request, res: Response) => {
