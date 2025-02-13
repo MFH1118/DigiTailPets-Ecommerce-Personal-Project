@@ -2,7 +2,7 @@
 
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { openAPI } from 'better-auth/plugins';
+import { openAPI, phoneNumber } from 'better-auth/plugins';
 import { prisma } from '../db/prisma.js';
 
 export const auth = betterAuth({
@@ -12,6 +12,7 @@ export const auth = betterAuth({
     appName: "DigitailPets",
     plugins: [
         openAPI(),
+        phoneNumber()
     ],
     emailAndPassword: {
         enabled: true,

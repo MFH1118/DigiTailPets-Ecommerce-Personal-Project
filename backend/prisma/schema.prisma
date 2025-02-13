@@ -17,6 +17,8 @@ model User {
   name          String
   email         String
   emailVerified Boolean
+  phoneNumber         String?
+  phoneNumberVerified Boolean?
   image         String?
   createdAt     DateTime
   updatedAt     DateTime
@@ -25,6 +27,7 @@ model User {
 
   @@unique([email])
   @@map("user")
+  @@unique([phoneNumber])
 }
 
 model Session {
