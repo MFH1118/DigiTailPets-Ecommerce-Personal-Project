@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 import Link from 'next/link';
-import CheckoutBreadcrumb from '@/components/CheckoutBreadcrumb';
+import CheckoutBreadcrumb from '@/components/checkout/CheckoutBreadcrumb';
 import {
   Card,
   CardContent,

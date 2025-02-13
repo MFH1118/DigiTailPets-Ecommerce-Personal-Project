@@ -1,6 +1,6 @@
 // src/app/product/[id]/page.tsx
 
-import ProductDetail from "@/components/ProductDetail";
+import ProductDetail from "@/components/products/ProductDetail";
 import { getProducts } from "@/data/products";
 
 export default function ProductPage({ params }: { params: { id: string } }) {
