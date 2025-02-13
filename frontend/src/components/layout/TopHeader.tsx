@@ -24,8 +24,8 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { useCart } from "@/context/CartContext";
-import CartSlideOver from "@/components/CartSlideOver";
-import { navigationLinks } from "@/components/NavigationHeader";
+import CartSlideOver from "@/components/cart/CartSlideOver";
+import { navigationLinks } from "@/components/layout/NavigationHeader";
 import {
   DropdownMenu,
   DropdownMenuTrigger,

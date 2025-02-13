@@ -32,7 +32,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import CheckoutBreadcrumb from '@/components/CheckoutBreadcrumb';
+import CheckoutBreadcrumb from '@/components/checkout/CheckoutBreadcrumb';
 import Link from 'next/link';
 
 const CheckoutPage = () => {
