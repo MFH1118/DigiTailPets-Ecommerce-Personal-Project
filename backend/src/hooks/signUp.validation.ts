@@ -8,12 +8,33 @@ const signupSchema = z
     password: z.string(),
   })
   .superRefine((data, ctx) => {
+
     // Check name first
     if (!data.name) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Name is required",
         path: ["name"]
+      });
+      return;
+    }
+
+    // Check email
+    if (!data.email) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Email is required",
+        path: ["email"]
+      });
+      return;
+    }
+
+    // Check password
+    if(!data.password) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Password is required",
+        path: ["password"]
       });
       return;
     }
@@ -35,7 +56,7 @@ const signupSchema = z
         message: "Name must be at least 2 characters",
         path: ["name"],
       });
-      return; // Exit early after first error
+      return;
     }
 
     // Then check email
@@ -121,5 +142,5 @@ export const signUpValidationHook = {
         throw error;
       }
     }
-  }),
+  })
 };
