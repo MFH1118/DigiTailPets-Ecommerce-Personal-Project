@@ -21,6 +21,7 @@
     "@prisma/client": "^6.1.0",
     "@types/express-useragent": "^1.0.5",
     "bcryptjs": "^2.4.3",
+    "better-auth": "^1.1.16",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
