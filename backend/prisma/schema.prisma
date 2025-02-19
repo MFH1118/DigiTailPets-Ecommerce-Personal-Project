@@ -5,7 +5,7 @@ datasource db {
   // main url
   // url      = env("DATABASE_URL")
   //test url
-  url = env("DATABASE_AUTH_BRANCH_URL")
+  url= env("DATABASE_AUTH_BRANCH_URL")
 }
 
 generator client {
@@ -13,32 +13,73 @@ generator client {
 }
 
 model User {
-  id          String    @id @default(uuid())
-  username    String    @unique @map("user_name")
-  email       String    @unique @map("user_email")
-  firstName   String    @map("user_first_name")
-  lastName    String    @map("user_last_name")
-  dateOfBirth DateTime  @map("user_dob")
-  dateCreated DateTime  @default(now()) @map("user_date_created")
-  lastLogin   DateTime? @map("user_last_login")
-  isActive    Boolean   @default(true) @map("user_is_active")
+  id            String   @id
+  name          String   @map("user_name")
+  email         String   @map("user_email")
+  emailVerified Boolean  @map("user_email_verified")
+  image         String?  @map("user_image")
+  createdAt     DateTime @map("user_created_at")
+  updatedAt     DateTime @map("user_updated_at")
 
   // Relations
-  role           Role             @relation(fields: [roleId], references: [id])
-  roleId         String           @map("role_id")
-  authentication Authentication?
-  sessions       Session[]
-  addresses      Address[]
-  carts          Cart?
-  wishList       WishList?
-  orders         Order[]
-  payments       PaymentDetails[]
-  auditlogs      AuditLog[]
+  role      Role             @relation(fields: [roleId], references: [id])
+  roleId    String           @map("role_id")
+  sessions  Session[]
+  accounts  Account[]
+  addresses Address[]
+  carts     Cart?
+  wishList  WishList?
+  orders    Order[]
+  payments  PaymentDetails[]
+  auditlogs AuditLog[]
 
-  @@index([email])
-  @@index([username])
-  @@index([isActive])
-  @@map("users")
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
 }
 
 model Address {
@@ -69,39 +110,6 @@ model Role {
   users       User[]
 
   @@map("roles")
-}
-
-model Authentication {
-  id             String    @id @default(uuid())
-  passwordHash   String    @map("auth_password_hash")
-  passwordReset  String?   @map("auth_password_reset")
-  loginAttempts  Int       @default(0) @map("auth_login_attempts")
-  lockoutEndTime DateTime? @map("auth_lockout_end_time")
-
-  // Relations
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @unique @map("user_id")
-
-  @@index([loginAttempts, lockoutEndTime])
-  @@map("authentications")
-}
-
-model Session {
-  id           String   @id @default(uuid()) @map("session_id")
-  userId       String   @map("user_id")
-  token        String   @unique @map("session_token")
-  expiry       DateTime @map("session_expiry")
-  type         String   @map("session_type")
-  creationTime DateTime @default(now()) @map("session_creation_time")
-  lastAccessed DateTime @default(now()) @map("session_last_accessed")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id])
-
-  @@index([token])
-  @@index([expiry])
-  @@index([userId, expiry])
-  @@map("sessions")
 }
 
 model Product {
