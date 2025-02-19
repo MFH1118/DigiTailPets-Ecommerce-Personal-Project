@@ -17,6 +17,8 @@ model User {
   name          String   @map("user_name")
   email         String   @map("user_email")
   emailVerified Boolean  @map("user_email_verified")
+  phoneNumber         String?
+  phoneNumberVerified Boolean?
   image         String?  @map("user_image")
   createdAt     DateTime @map("user_created_at")
   updatedAt     DateTime @map("user_updated_at")
@@ -35,6 +37,7 @@ model User {
 
   @@unique([email])
   @@map("user")
+  @@unique([phoneNumber])
 }
 
 model Session {
