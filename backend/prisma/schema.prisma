@@ -24,8 +24,6 @@ model User {
   updatedAt     DateTime @map("user_updated_at")
 
   // Relations
-  role      Role             @relation(fields: [roleId], references: [id])
-  roleId    String           @map("role_id")
   sessions  Session[]
   accounts  Account[]
   addresses Address[]
@@ -104,15 +102,6 @@ model Address {
   @@index([userId, addressType])
   @@index([isDefault])
   @@map("addresses")
-}
-
-model Role {
-  id          String  @id @default(uuid())
-  name        String  @unique @map("role_name")
-  description String? @map("role_desc")
-  users       User[]
-
-  @@map("roles")
 }
 
 model Product {
