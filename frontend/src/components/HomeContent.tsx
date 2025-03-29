@@ -67,12 +67,6 @@ const ProductSection = ({ title, products }: ProductSectionProps) => (
 const HomeContent = () => {
   return (
     <div className="max-w-[1220px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 py-4 sm:py-6 md:py-8">
-      <div className="w-full h-64 bg-gray-100 mb-12 rounded-lg overflow-hidden relative">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-4xl font-bold text-gray-800">Sales Advert</h1>
-        </div>
-      </div>
-
       <ProductSection title="Featured" products={getFeaturedProducts()} />
       <ProductSection title="New Releases" products={getNewReleases()} />
       <ProductSection title="Essentials" products={getEssentials()} />
